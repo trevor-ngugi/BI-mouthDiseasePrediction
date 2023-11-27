@@ -11,8 +11,19 @@ Business Intelligence Lab Submission Markdown
       - [Data Types](#data-types)
   - [Descriptive Statistics](#descriptive-statistics)
       - [Measures of Frequency](#measures-of-frequency)
-      - [Measures of Distribution/Dispersion/Spread/Scatter/Variability
-        —-](#measures-of-distributiondispersionspreadscattervariability--)
+      - [Measures of
+        Distribution/Dispersion/Spread/Scatter/Variability](#measures-of-distributiondispersionspreadscattervariability)
+      - [changing the symptom into numeric
+        values](#changing-the-symptom-into-numeric-values)
+      - [univariate plots](#univariate-plots)
+          - [Create Box and Whisker Plots for Each Numeric
+            Attribute](#create-box-and-whisker-plots-for-each-numeric-attribute)
+          - [Create Bar Plots for Each Categorical Attribute
+            —-](#create-bar-plots-for-each-categorical-attribute--)
+          - [Create a Missingness Map to Identify Missing Data
+            —-](#create-a-missingness-map-to-identify-missing-data--)
+      - [multivariate plots](#multivariate-plots)
+          - [Create a Correlation Plot —-](#create-a-correlation-plot--)
   - [\<You can Provide Another Appropriate Title Here if you
     wish\>](#you-can-provide-another-appropriate-title-here-if-you-wish)
       - [\<You Can Have a Sub-Title Here if you
@@ -144,6 +155,10 @@ if (require("languageserver")) {
   install.packages("languageserver", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
+if (!is.element("ggcorrplot", installed.packages()[, 1])) {
+  install.packages("ggcorrplot", dependencies = TRUE)
+}
+require("ggcorrplot")
 ```
 
 -----
@@ -189,10 +204,6 @@ defaults in this markdown:
 The gum disease datatset is then loaded. The dataset and its metadata
 are available here:
 <https://drive.google.com/drive/folders/1-BGEhfOwquXF6KKXwcvrx7WuZXuqmW9q?usp=sharing>
-
-``` r
-# yes working
-```
 
 ``` r
 library(readr)
@@ -350,7 +361,7 @@ cbind(frequency = table(treatment_density_freq), percentage = prop.table(table(t
     ## mouthwash                                6   11.11111
     ## Tooth polishing                         24   44.44444
 
-## Measures of Distribution/Dispersion/Spread/Scatter/Variability —-
+## Measures of Distribution/Dispersion/Spread/Scatter/Variability
 
 ``` r
 summary(Data_of_teeth)
@@ -365,7 +376,92 @@ summary(Data_of_teeth)
     ##  Class :character   NA's:54       
     ##  Mode  :character
 
+## changing the symptom into numeric values
+
+``` r
+# Coding scheme for symptoms
+symptom_coding <- c(`a cracked tooth` = 1, `Bad breath` = 2, `Black, white, or brown tooth stains` = 3,
+    bleeding = 4, `Cracked or chipped teeth` = 5, `Difficulty chewing or swallowing` = 6,
+    `Dramatic weight loss` = 7, `Ear Pain` = 8, `Grooves on your teeth’s surface` = 9,
+    `gum disease` = 10, `Holes or pits in your teeth` = 11, pain = 12, `Pain when you bite down` = 13,
+    `Painful chewing` = 14, `Red and swollen gums` = 15, `sore throat` = 16, `Tender or bleeding gums` = 17,
+    `worn-down fillings or crowns` = 18, `Yellowish discoloration` = 19)
+
+# Applying coding scheme to create a new column
+teeth_Num <- Data_of_teeth
+teeth_Num$symptom1 <- symptom_coding[Data_of_teeth$"Symptom 1"]
+teeth_Num$symptom2 <- symptom_coding[Data_of_teeth$"Symptom 2"]
+teeth_Num$symptom3 <- symptom_coding[Data_of_teeth$"Symptom 3"]
+```
+
+## univariate plots
+
+### Create Box and Whisker Plots for Each Numeric Attribute
+
+``` r
+boxplot(teeth_Num[, 7], main = names(teeth_Num)[7])
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%207%20Code%20Chunk-1.png)<!-- -->
+
+``` r
+boxplot(teeth_Num[, 8], main = names(teeth_Num)[8])
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%207%20Code%20Chunk-2.png)<!-- -->
+
+``` r
+boxplot(teeth_Num[, 9], main = names(teeth_Num)[9])
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%207%20Code%20Chunk-3.png)<!-- -->
+
+### Create Bar Plots for Each Categorical Attribute —-
+
+``` r
+barplot(table(teeth_Num[, 4]), main = names(teeth_Num)[4])
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%208%20Code%20Chunk-1.png)<!-- -->
+
+### Create a Missingness Map to Identify Missing Data —-
+
+``` r
+missmap(Data_of_teeth, col = c("red", "grey"), legend = TRUE)
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%209%20Code%20Chunk-1.png)<!-- -->
+
+## multivariate plots
+
+### Create a Correlation Plot —-
+
+Correlation plots can be used to get an idea of which attributes change
+together. The function “corrplot()” found in the package “corrplot” is
+required to perform this. The larger the dot in the correlation plot,
+the larger the correlation. Blue represents a positive correlation
+whereas red represents a negative correlation.
+
+``` r
+corrplot(cor(teeth_Num[, 7:9]), method = "circle")
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2010%20Code%20Chunk-1.png)<!-- -->
+
+Alternatively, the ‘ggcorrplot::ggcorrplot()’ function can be used to
+plot a more visually appealing plot.
+
+``` r
+ggcorrplot(cor(teeth_Num[, 7:9]))
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2011%20Code%20Chunk-1.png)<!-- -->
+
 # \<You can Provide Another Appropriate Title Here if you wish\>
+
+``` r
+# yes working
+```
 
 Describe the code chunk here:
 
