@@ -26,8 +26,26 @@ Business Intelligence Lab Submission Markdown
           - [Create a Correlation Plot](#create-a-correlation-plot)
   - [preprocessing and data
     transformation](#preprocessing-and-data-transformation)
-      - [Confirm the “missingness” in the Dataset before Imputation
-        —-](#confirm-the-missingness-in-the-dataset-before-imputation--)
+      - [Confirm the “missingness” in the Dataset before
+        Imputation](#confirm-the-missingness-in-the-dataset-before-imputation)
+  - [Selection of model](#selection-of-model)
+      - [Split the dataset](#split-the-dataset)
+      - [1. Decision tree for a classification problem with
+        caret](#1-decision-tree-for-a-classification-problem-with-caret)
+      - [2. Naïve Bayes](#2-naïve-bayes)
+      - [3. kNN for a classification problem with CARET’s train
+        function](#3-knn-for-a-classification-problem-with-carets-train-function)
+      - [4. SVM Classifier for a classification problem with
+        CARET](#4-svm-classifier-for-a-classification-problem-with-caret)
+      - [Call the `resamples` Function](#call-the-resamples-function)
+      - [Display the Results](#display-the-results)
+          - [1. Table Summary](#1-table-summary)
+          - [2. Box and Whisker Plot](#2-box-and-whisker-plot)
+          - [3. Dot Plots](#3-dot-plots)
+          - [4. Scatter Plot Matrix](#4-scatter-plot-matrix)
+          - [5. Pairwise xyPlots](#5-pairwise-xyplots)
+          - [6. Statistical Significance
+            Tests](#6-statistical-significance-tests)
   - [\<You can Provide Another Appropriate Title Here if you
     wish\>](#you-can-provide-another-appropriate-title-here-if-you-wish)
       - [\<You Can Have a Sub-Title Here if you
@@ -163,6 +181,45 @@ if (!is.element("ggcorrplot", installed.packages()[, 1])) {
   install.packages("ggcorrplot", dependencies = TRUE)
 }
 require("ggcorrplot")
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## factoextra ----
+if (require("factoextra")) {
+  require("factoextra")
+} else {
+  install.packages("factoextra", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## FactoMineR ----
+if (require("FactoMineR")) {
+  require("FactoMineR")
+} else {
+  install.packages("FactoMineR", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## kernlab ----
+if (require("kernlab")) {
+  require("kernlab")
+} else {
+  install.packages("kernlab", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## rpart ----
+if (require("rpart")) {
+  require("rpart")
+} else {
+  install.packages("rpart", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
 ```
 
 -----
@@ -463,7 +520,7 @@ ggcorrplot(cor(teeth_Num[, 7:9]))
 
 # preprocessing and data transformation
 
-## Confirm the “missingness” in the Dataset before Imputation —-
+## Confirm the “missingness” in the Dataset before Imputation
 
 Are there missing values in the dataset?
 
@@ -595,6 +652,661 @@ any_na(teeth_Num)
 ```
 
     ## [1] FALSE
+
+# Selection of model
+
+## Split the dataset
+
+Define a 75:25 train:test data split of the dataset. That is, 75% of the
+original data will be used to train the model and 25% of the original
+data will be used to test the model.
+
+``` r
+train_index <- createDataPartition(teeth_Num$Disease, p = 0.75, list = FALSE)
+teeth_disease_train <- teeth_Num[train_index, ]
+teeth_disease_test <- teeth_Num[-train_index, ]
+```
+
+## 1\. Decision tree for a classification problem with caret
+
+``` r
+### Train the model
+set.seed(7)
+# We apply the 5-fold cross validation resampling method
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_rpart <- train(Disease ~ ., data = teeth_Num, method = "rpart",
+    metric = "Accuracy", trControl = train_control)
+
+# Display the model's details
+print(teeth_caret_model_rpart)
+```
+
+    ## CART 
+    ## 
+    ## 54 samples
+    ##  3 predictor
+    ##  6 classes: 'cavity', 'dentin hypersensitivity', 'Mouth Sores', 'Oral Cancer', 'Periodontitis', 'Tooth Erosion' 
+    ## 
+    ## No pre-processing
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 43, 44, 43, 44, 42 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   cp    Accuracy   Kappa    
+    ##   0.00  0.5381818  0.3276063
+    ##   0.05  0.5381818  0.3276063
+    ##   0.10  0.5181818  0.2488184
+    ## 
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final value used for the model was cp = 0.05.
+
+``` r
+# Make predictions
+predictions <- predict(teeth_caret_model_rpart, teeth_disease_test[, 2:4], type = "raw")
+
+# Display the model's evaluation metrics
+table(predictions, teeth_disease_test$Disease)
+```
+
+    ##                          
+    ## predictions               cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       1                       1           1
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                0                       0           0
+    ##   Tooth Erosion                0                       0           0
+    ##                          
+    ## predictions               Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             1
+    ##   Periodontitis                     0             6             0
+    ##   Tooth Erosion                     0             0             0
+
+``` r
+confusion_matrix <- caret::confusionMatrix(predictions, as.factor(teeth_disease_test[,
+    1:4]$Disease))
+print(confusion_matrix)
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                          Reference
+    ## Prediction                cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       1                       1           1
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                0                       0           0
+    ##   Tooth Erosion                0                       0           0
+    ##                          Reference
+    ## Prediction                Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             1
+    ##   Periodontitis                     0             6             0
+    ##   Tooth Erosion                     0             0             0
+    ## 
+    ## Overall Statistics
+    ##                                           
+    ##                Accuracy : 0.7273          
+    ##                  95% CI : (0.3903, 0.9398)
+    ##     No Information Rate : 0.5455          
+    ##     P-Value [Acc > NIR] : 0.1829          
+    ##                                           
+    ##                   Kappa : 0.5875          
+    ##                                           
+    ##  Mcnemar's Test P-Value : NA              
+    ## 
+    ## Statistics by Class:
+    ## 
+    ##                      Class: cavity Class: dentin hypersensitivity
+    ## Sensitivity                1.00000                        0.00000
+    ## Specificity                0.80000                        1.00000
+    ## Pos Pred Value             0.33333                            NaN
+    ## Neg Pred Value             1.00000                        0.90909
+    ## Prevalence                 0.09091                        0.09091
+    ## Detection Rate             0.09091                        0.00000
+    ## Detection Prevalence       0.27273                        0.00000
+    ## Balanced Accuracy          0.90000                        0.50000
+    ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
+    ## Sensitivity                     0.00000            1.00000               1.0000
+    ## Specificity                     1.00000            0.90000               1.0000
+    ## Pos Pred Value                      NaN            0.50000               1.0000
+    ## Neg Pred Value                  0.90909            1.00000               1.0000
+    ## Prevalence                      0.09091            0.09091               0.5455
+    ## Detection Rate                  0.00000            0.09091               0.5455
+    ## Detection Prevalence            0.00000            0.18182               0.5455
+    ## Balanced Accuracy               0.50000            0.95000               1.0000
+    ##                      Class: Tooth Erosion
+    ## Sensitivity                       0.00000
+    ## Specificity                       1.00000
+    ## Pos Pred Value                        NaN
+    ## Neg Pred Value                    0.90909
+    ## Prevalence                        0.09091
+    ## Detection Rate                    0.00000
+    ## Detection Prevalence              0.00000
+    ## Balanced Accuracy                 0.50000
+
+## 2\. Naïve Bayes
+
+``` r
+#### Train the model ---- We apply the 5-fold cross validation resampling
+#### method
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_nb <- train(Disease ~ ., data = teeth_disease_train, method = "nb",
+    metric = "Accuracy", trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_nb)
+```
+
+    ## Naive Bayes 
+    ## 
+    ## 43 samples
+    ##  3 predictor
+    ##  6 classes: 'cavity', 'dentin hypersensitivity', 'Mouth Sores', 'Oral Cancer', 'Periodontitis', 'Tooth Erosion' 
+    ## 
+    ## No pre-processing
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 35, 34, 34, 34, 35 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   usekernel  Accuracy   Kappa    
+    ##   FALSE      0.4444444  0.1477149
+    ##    TRUE      0.7000000  0.5798596
+    ## 
+    ## Tuning parameter 'fL' was held constant at a value of 0
+    ## Tuning
+    ##  parameter 'adjust' was held constant at a value of 1
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final values used for the model were fL = 0, usekernel = TRUE and adjust
+    ##  = 1.
+
+``` r
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_nb, teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+confusion_matrix <- caret::confusionMatrix(predictions, as.factor(teeth_disease_test[,
+    1:4]$Disease))
+print(confusion_matrix)
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                          Reference
+    ## Prediction                cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       1                       0           1
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                0                       0           0
+    ##   Tooth Erosion                0                       1           0
+    ##                          Reference
+    ## Prediction                Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             0
+    ##   Tooth Erosion                     0             0             1
+    ## 
+    ## Overall Statistics
+    ##                                           
+    ##                Accuracy : 0.8182          
+    ##                  95% CI : (0.4822, 0.9772)
+    ##     No Information Rate : 0.5455          
+    ##     P-Value [Acc > NIR] : 0.0615          
+    ##                                           
+    ##                   Kappa : 0.725           
+    ##                                           
+    ##  Mcnemar's Test P-Value : NA              
+    ## 
+    ## Statistics by Class:
+    ## 
+    ##                      Class: cavity Class: dentin hypersensitivity
+    ## Sensitivity                1.00000                        0.00000
+    ## Specificity                0.90000                        1.00000
+    ## Pos Pred Value             0.50000                            NaN
+    ## Neg Pred Value             1.00000                        0.90909
+    ## Prevalence                 0.09091                        0.09091
+    ## Detection Rate             0.09091                        0.00000
+    ## Detection Prevalence       0.18182                        0.00000
+    ## Balanced Accuracy          0.95000                        0.50000
+    ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
+    ## Sensitivity                     0.00000            1.00000               1.0000
+    ## Specificity                     1.00000            1.00000               1.0000
+    ## Pos Pred Value                      NaN            1.00000               1.0000
+    ## Neg Pred Value                  0.90909            1.00000               1.0000
+    ## Prevalence                      0.09091            0.09091               0.5455
+    ## Detection Rate                  0.00000            0.09091               0.5455
+    ## Detection Prevalence            0.00000            0.09091               0.5455
+    ## Balanced Accuracy               0.50000            1.00000               1.0000
+    ##                      Class: Tooth Erosion
+    ## Sensitivity                       1.00000
+    ## Specificity                       0.90000
+    ## Pos Pred Value                    0.50000
+    ## Neg Pred Value                    1.00000
+    ## Prevalence                        0.09091
+    ## Detection Rate                    0.09091
+    ## Detection Prevalence              0.18182
+    ## Balanced Accuracy                 0.95000
+
+## 3\. kNN for a classification problem with CARET’s train function
+
+``` r
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 10)
+teeth_caret_model_knn <- train(Disease ~ ., data = teeth_Num, method = "knn", metric = "Accuracy",
+    preProcess = c("center", "scale"), trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_knn)
+```
+
+    ## k-Nearest Neighbors 
+    ## 
+    ## 54 samples
+    ##  3 predictor
+    ##  6 classes: 'cavity', 'dentin hypersensitivity', 'Mouth Sores', 'Oral Cancer', 'Periodontitis', 'Tooth Erosion' 
+    ## 
+    ## Pre-processing: centered (3), scaled (3) 
+    ## Resampling: Cross-Validated (10 fold) 
+    ## Summary of sample sizes: 50, 49, 48, 47, 47, 48, ... 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   k  Accuracy   Kappa    
+    ##   5  0.5633333  0.2768057
+    ##   7  0.5633333  0.2160556
+    ##   9  0.5633333  0.2160556
+    ## 
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final value used for the model was k = 9.
+
+``` r
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_knn, teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+confusion_matrix <- caret::confusionMatrix(predictions, as.factor(teeth_disease_test[,
+    1:4]$Disease))
+print(confusion_matrix)
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                          Reference
+    ## Prediction                cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       0                       0           0
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                1                       1           1
+    ##   Tooth Erosion                0                       0           0
+    ##                          Reference
+    ## Prediction                Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             1
+    ##   Tooth Erosion                     0             0             0
+    ## 
+    ## Overall Statistics
+    ##                                           
+    ##                Accuracy : 0.6364          
+    ##                  95% CI : (0.3079, 0.8907)
+    ##     No Information Rate : 0.5455          
+    ##     P-Value [Acc > NIR] : 0.3853          
+    ##                                           
+    ##                   Kappa : 0.2667          
+    ##                                           
+    ##  Mcnemar's Test P-Value : NA              
+    ## 
+    ## Statistics by Class:
+    ## 
+    ##                      Class: cavity Class: dentin hypersensitivity
+    ## Sensitivity                0.00000                        0.00000
+    ## Specificity                1.00000                        1.00000
+    ## Pos Pred Value                 NaN                            NaN
+    ## Neg Pred Value             0.90909                        0.90909
+    ## Prevalence                 0.09091                        0.09091
+    ## Detection Rate             0.00000                        0.00000
+    ## Detection Prevalence       0.00000                        0.00000
+    ## Balanced Accuracy          0.50000                        0.50000
+    ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
+    ## Sensitivity                     0.00000            1.00000               1.0000
+    ## Specificity                     1.00000            1.00000               0.2000
+    ## Pos Pred Value                      NaN            1.00000               0.6000
+    ## Neg Pred Value                  0.90909            1.00000               1.0000
+    ## Prevalence                      0.09091            0.09091               0.5455
+    ## Detection Rate                  0.00000            0.09091               0.5455
+    ## Detection Prevalence            0.00000            0.09091               0.9091
+    ## Balanced Accuracy               0.50000            1.00000               0.6000
+    ##                      Class: Tooth Erosion
+    ## Sensitivity                       0.00000
+    ## Specificity                       1.00000
+    ## Pos Pred Value                        NaN
+    ## Neg Pred Value                    0.90909
+    ## Prevalence                        0.09091
+    ## Detection Rate                    0.00000
+    ## Detection Prevalence              0.00000
+    ## Balanced Accuracy                 0.50000
+
+## 4\. SVM Classifier for a classification problem with CARET
+
+``` r
+#### Train the model ----
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_svm_radial <- # nolint: object_length_linter.
+  train(Disease ~ ., data = teeth_disease_train, method = "svmRadial",
+        metric = "Accuracy", trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_svm_radial)
+```
+
+    ## Support Vector Machines with Radial Basis Function Kernel 
+    ## 
+    ## 43 samples
+    ##  3 predictor
+    ##  6 classes: 'cavity', 'dentin hypersensitivity', 'Mouth Sores', 'Oral Cancer', 'Periodontitis', 'Tooth Erosion' 
+    ## 
+    ## No pre-processing
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 35, 34, 34, 34, 35 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   C     Accuracy   Kappa    
+    ##   0.25  0.4166667  0.0000000
+    ##   0.50  0.5333333  0.2452381
+    ##   1.00  0.5333333  0.2452381
+    ## 
+    ## Tuning parameter 'sigma' was held constant at a value of 0.1649718
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final values used for the model were sigma = 0.1649718 and C = 0.5.
+
+``` r
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_svm_radial,
+                       teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+table(predictions, teeth_disease_test$Disease)
+```
+
+    ##                          
+    ## predictions               cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       0                       0           0
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                1                       1           1
+    ##   Tooth Erosion                0                       0           0
+    ##                          
+    ## predictions               Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             1
+    ##   Tooth Erosion                     0             0             0
+
+``` r
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                          Reference
+    ## Prediction                cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       0                       0           0
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                1                       1           1
+    ##   Tooth Erosion                0                       0           0
+    ##                          Reference
+    ## Prediction                Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             1
+    ##   Tooth Erosion                     0             0             0
+    ## 
+    ## Overall Statistics
+    ##                                           
+    ##                Accuracy : 0.6364          
+    ##                  95% CI : (0.3079, 0.8907)
+    ##     No Information Rate : 0.5455          
+    ##     P-Value [Acc > NIR] : 0.3853          
+    ##                                           
+    ##                   Kappa : 0.2667          
+    ##                                           
+    ##  Mcnemar's Test P-Value : NA              
+    ## 
+    ## Statistics by Class:
+    ## 
+    ##                      Class: cavity Class: dentin hypersensitivity
+    ## Sensitivity                0.00000                        0.00000
+    ## Specificity                1.00000                        1.00000
+    ## Pos Pred Value                 NaN                            NaN
+    ## Neg Pred Value             0.90909                        0.90909
+    ## Prevalence                 0.09091                        0.09091
+    ## Detection Rate             0.00000                        0.00000
+    ## Detection Prevalence       0.00000                        0.00000
+    ## Balanced Accuracy          0.50000                        0.50000
+    ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
+    ## Sensitivity                     0.00000            1.00000               1.0000
+    ## Specificity                     1.00000            1.00000               0.2000
+    ## Pos Pred Value                      NaN            1.00000               0.6000
+    ## Neg Pred Value                  0.90909            1.00000               1.0000
+    ## Prevalence                      0.09091            0.09091               0.5455
+    ## Detection Rate                  0.00000            0.09091               0.5455
+    ## Detection Prevalence            0.00000            0.09091               0.9091
+    ## Balanced Accuracy               0.50000            1.00000               0.6000
+    ##                      Class: Tooth Erosion
+    ## Sensitivity                       0.00000
+    ## Specificity                       1.00000
+    ## Pos Pred Value                        NaN
+    ## Neg Pred Value                    0.90909
+    ## Prevalence                        0.09091
+    ## Detection Rate                    0.00000
+    ## Detection Prevalence              0.00000
+    ## Balanced Accuracy                 0.50000
+
+\#model performance comparison
+
+``` r
+train_control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+### CART ----
+set.seed(7)
+teeth_model_cart <- train(Disease ~ ., data = teeth_Num, method = "rpart", trControl = train_control)
+
+### KNN ----
+set.seed(7)
+teeth_model_knn <- train(Disease ~ ., data = teeth_Num, method = "knn", trControl = train_control)
+
+### SVM ----
+set.seed(7)
+teeth_model_svm <- train(Disease ~ ., data = teeth_Num, method = "svmRadial", trControl = train_control)
+
+### naive bayes ----
+set.seed(7)
+teeth_model_nb <- train(Disease ~ ., data = teeth_Num, method = "nb", trControl = train_control)
+```
+
+## Call the `resamples` Function
+
+We then create a list of the model results and pass the list as an
+argument to the `resamples` function.
+
+``` r
+results <- resamples(list(CART = teeth_model_cart, KNN = teeth_model_knn, SVM = teeth_model_svm,
+    NB = teeth_model_nb))
+```
+
+## Display the Results
+
+### 1\. Table Summary
+
+This is the simplest comparison. It creates a table with one model per
+row and its corresponding evaluation metrics displayed per column.
+
+``` r
+summary(results)
+```
+
+    ## 
+    ## Call:
+    ## summary.resamples(object = results)
+    ## 
+    ## Models: CART, KNN, SVM, NB 
+    ## Number of resamples: 30 
+    ## 
+    ## Accuracy 
+    ##           Min.   1st Qu.    Median      Mean 3rd Qu. Max. NA's
+    ## CART 0.1428571 0.4071429 0.5000000 0.5219841     0.6  0.8    0
+    ## KNN  0.4000000 0.5000000 0.5357143 0.5709524     0.6  1.0    0
+    ## SVM  0.4000000 0.5000000 0.5000000 0.5642857     0.6  1.0    0
+    ## NB   0.4000000 0.6666667 0.7500000 0.7392063     0.8  1.0    0
+    ## 
+    ## Kappa 
+    ##       Min.   1st Qu.    Median      Mean   3rd Qu.      Max. NA's
+    ## CART -0.05 0.1750000 0.2679426 0.2837909 0.4088235 0.5833333    0
+    ## KNN   0.00 0.1428571 0.3076923 0.3013094 0.4088235 1.0000000    0
+    ## SVM   0.00 0.0000000 0.2800000 0.2466772 0.3750000 1.0000000    0
+    ## NB    0.00 0.4736842 0.6136163 0.5929589 0.7331871 1.0000000    0
+
+### 2\. Box and Whisker Plot
+
+This is useful for visually observing the spread of the estimated
+accuracies for different algorithms and how they relate.
+
+``` r
+scales <- list(x = list(relation = "free"), y = list(relation = "free"))
+bwplot(results, scales = scales)
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%20266%20Code%20Chunk-1.png)<!-- -->
+
+### 3\. Dot Plots
+
+They show both the mean estimated accuracy as well as the 95% confidence
+interval (e.g. the range in which 95% of observed scores fell).
+
+``` r
+scales <- list(x = list(relation = "free"), y = list(relation = "free"))
+dotplot(results, scales = scales)
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2027%20Code%20Chunk-1.png)<!-- -->
+
+### 4\. Scatter Plot Matrix
+
+This is useful when considering whether the predictions from two
+different algorithms are correlated. If weakly correlated, then they are
+good candidates for being combined in an ensemble prediction.
+
+``` r
+splom(results)
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%20277%20Code%20Chunk-1.png)<!-- -->
+
+### 5\. Pairwise xyPlots
+
+You can zoom in on one pairwise comparison of the accuracy of
+trial-folds for two models using an xyplot.
+
+``` r
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "SVM"))
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2028%20Code%20Chunk-1.png)<!-- -->
+
+``` r
+# xyplot plots to compare models
+xyplot(results, models = c("SVM", "CART"))
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2028%20Code%20Chunk-2.png)<!-- -->
+
+``` r
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "CART"))
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2028%20Code%20Chunk-3.png)<!-- -->
+
+``` r
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "NB"))
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2028%20Code%20Chunk-4.png)<!-- -->
+
+``` r
+# or xyplot plots to compare models
+xyplot(results, models = c("NB", "CART"))
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2028%20Code%20Chunk-5.png)<!-- -->
+
+### 6\. Statistical Significance Tests
+
+This is used to calculate the significance of the differences between
+the metric distributions of the various models.
+
+Upper Diagonal The upper diagonal of the table shows the estimated
+difference between the distributions. If we think that LDA is the most
+accurate model from looking at the previous graphs, we can get an
+estimate of how much better it is than specific other models in terms of
+absolute accuracy.
+
+Lower Diagonal The lower diagonal contains p-values of the null
+hypothesis. The null hypothesis is a claim that “the distributions are
+the same”. A lower p-value is better (more significant).
+
+``` r
+diffs <- diff(results)
+
+summary(diffs)
+```
+
+    ## 
+    ## Call:
+    ## summary.diff.resamples(object = diffs)
+    ## 
+    ## p-value adjustment: bonferroni 
+    ## Upper diagonal: estimates of the difference
+    ## Lower diagonal: p-value for H0: difference = 0
+    ## 
+    ## Accuracy 
+    ##      CART      KNN       SVM       NB       
+    ## CART           -0.048968 -0.042302 -0.217222
+    ## KNN  0.04209              0.006667 -0.168254
+    ## SVM  0.08219   1.00000             -0.174921
+    ## NB   5.144e-09 1.394e-06 1.553e-06          
+    ## 
+    ## Kappa 
+    ##      CART      KNN       SVM       NB      
+    ## CART           -0.01752   0.03711  -0.30917
+    ## KNN  1.00000              0.05463  -0.29165
+    ## SVM  1.00000   0.01158             -0.34628
+    ## NB   8.658e-07 1.359e-07 1.979e-07
 
 # \<You can Provide Another Appropriate Title Here if you wish\>
 

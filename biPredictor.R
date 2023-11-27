@@ -284,7 +284,7 @@ train_index <- createDataPartition(teeth_Num$Disease,
 teeth_disease_train <- teeth_Num[train_index, ]
 teeth_disease_test <- teeth_Num[-train_index, ]
 
-### 1.c. Decision tree for a classification problem with caret ----
+### 1. Decision tree for a classification problem with caret ----
 #### Train the model ----
 set.seed(7)
 # We apply the 5-fold cross validation resampling method
@@ -332,7 +332,7 @@ confusion_matrix <-
                          as.factor(teeth_disease_test[, 1:4]$Disease))
 print(confusion_matrix)
 
-### 3.c. kNN for a classification problem with CARET's train function ----
+### 3. kNN for a classification problem with CARET's train function ---- 
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 10)
 teeth_caret_model_knn <- train(Disease ~ ., data = teeth_Num,
@@ -353,6 +353,130 @@ confusion_matrix <-
                          as.factor(teeth_disease_test[, 1:4]$Disease))
 print(confusion_matrix)
 
+### 4. SVM Classifier for a classification problem with CARET ----
+#### Train the model ----
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_svm_radial <- # nolint: object_length_linter.
+  train(Disease ~ ., data = teeth_disease_train, method = "svmRadial",
+        metric = "Accuracy", trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_svm_radial)
+
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_svm_radial,
+                       teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+table(predictions, teeth_disease_test$Disease)
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+
+#model performance comparison ----
+train_control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+### CART ----
+set.seed(7)
+teeth_model_cart <- train(Disease ~ ., data = teeth_Num,
+                             method = "rpart", trControl = train_control)
+
+### KNN ----
+set.seed(7)
+teeth_model_knn <- train(Disease ~ ., data = teeth_Num,
+                            method = "knn", trControl = train_control)
+
+### SVM ----
+set.seed(7)
+teeth_model_svm <- train(Disease ~ ., data = teeth_Num,
+                            method = "svmRadial", trControl = train_control)
+
+### naive bayes ----
+set.seed(7)
+teeth_model_nb <- train(Disease ~ ., data = teeth_Num,
+                         method = "nb", trControl = train_control)
+
+
+
+##  Call the `resamples` Function ----
+# We then create a list of the model results and pass the list as an argument
+# to the `resamples` function.
+
+results <- resamples(list( CART = teeth_model_cart,
+                          KNN = teeth_model_knn, SVM = teeth_model_svm,
+                          NB = teeth_model_nb))
+
+#  Display the Results ----
+## 1. Table Summary ----
+# This is the simplest comparison. It creates a table with one model per row
+# and its corresponding evaluation metrics displayed per column.
+
+summary(results)
+
+## 2. Box and Whisker Plot ----
+# This is useful for visually observing the spread of the estimated accuracies
+# for different algorithms and how they relate.
+
+scales <- list(x = list(relation = "free"), y = list(relation = "free"))
+bwplot(results, scales = scales)
+
+## 3. Dot Plots ----
+# They show both the mean estimated accuracy as well as the 95% confidence
+# interval (e.g. the range in which 95% of observed scores fell).
+
+scales <- list(x = list(relation = "free"), y = list(relation = "free"))
+dotplot(results, scales = scales)
+
+## 4. Scatter Plot Matrix ----
+# This is useful when considering whether the predictions from two
+# different algorithms are correlated. If weakly correlated, then they are good
+# candidates for being combined in an ensemble prediction.
+
+splom(results)
+
+## 5. Pairwise xyPlots ----
+# You can zoom in on one pairwise comparison of the accuracy of trial-folds for
+# two models using an xyplot.
+
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "SVM"))
+
+# or
+# xyplot plots to compare models
+xyplot(results, models = c("SVM", "CART"))
+
+# or
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "CART"))
+
+# or
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "NB"))
+
+# or
+# xyplot plots to compare models
+xyplot(results, models = c("NB", "CART"))
+
+## 6. Statistical Significance Tests ----
+# This is used to calculate the significance of the differences between the
+# metric distributions of the various models.
+
+### Upper Diagonal ----
+# The upper diagonal of the table shows the estimated difference between the
+# distributions. If we think that LDA is the most accurate model from looking
+# at the previous graphs, we can get an estimate of how much better it is than
+# specific other models in terms of absolute accuracy.
+
+### Lower Diagonal ----
+# The lower diagonal contains p-values of the null hypothesis.
+# The null hypothesis is a claim that "the distributions are the same".
+# A lower p-value is better (more significant).
+
+diffs <- diff(results)
+
+summary(diffs)
 
 
 

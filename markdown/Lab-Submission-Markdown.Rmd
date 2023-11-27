@@ -130,6 +130,45 @@ if (!is.element("ggcorrplot", installed.packages()[, 1])) {
   install.packages("ggcorrplot", dependencies = TRUE)
 }
 require("ggcorrplot")
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## factoextra ----
+if (require("factoextra")) {
+  require("factoextra")
+} else {
+  install.packages("factoextra", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## FactoMineR ----
+if (require("FactoMineR")) {
+  require("FactoMineR")
+} else {
+  install.packages("FactoMineR", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## kernlab ----
+if (require("kernlab")) {
+  require("kernlab")
+} else {
+  install.packages("kernlab", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## rpart ----
+if (require("rpart")) {
+  require("rpart")
+} else {
+  install.packages("rpart", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
 ```
 
 ------------------------------------------------------------------------
@@ -294,7 +333,7 @@ ggcorrplot(cor(teeth_Num[, 7:9]))
 ```
 
 # preprocessing and data transformation
-## Confirm the "missingness" in the Dataset before Imputation ----
+## Confirm the "missingness" in the Dataset before Imputation 
  Are there missing values in the dataset?
 ```{r Your 12 Code Chunk}
 any_na(Data_of_teeth)
@@ -355,6 +394,240 @@ confirm if there is missing data
 any_na(Data_of_teeth)
 any_na(teeth_Num)
 ```
+
+# Selection of model
+## Split the dataset 
+ Define a 75:25 train:test data split of the dataset.
+ That is, 75% of the original data will be used to train the model and 25% of the original data will be used to test the model.
+```{r Your 212 Code Chunk}
+train_index <- createDataPartition(teeth_Num$Disease,
+                                   p = 0.75,
+                                   list = FALSE)
+teeth_disease_train <- teeth_Num[train_index, ]
+teeth_disease_test <- teeth_Num[-train_index, ]
+```
+
+
+## 1. Decision tree for a classification problem with caret 
+ 
+```{r Your 21 Code Chunk}
+### Train the model
+set.seed(7)
+# We apply the 5-fold cross validation resampling method
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_rpart <- train(Disease ~ ., data = teeth_Num,
+                                    method = "rpart", metric = "Accuracy",
+                                    trControl = train_control)
+
+# Display the model's details 
+print(teeth_caret_model_rpart)
+
+# Make predictions 
+predictions <- predict(teeth_caret_model_rpart,
+                       teeth_disease_test[, 2:4],
+                       type = "raw")
+
+# Display the model's evaluation metrics 
+table(predictions, teeth_disease_test$Disease)
+
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+```
+
+
+## 2.  Naïve Bayes 
+```{r Your 22 Code Chunk}
+#### Train the model ----
+# We apply the 5-fold cross validation resampling method
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_nb <- train(Disease ~ .,
+                                 data = teeth_disease_train,
+                                 method = "nb", metric = "Accuracy",
+                                 trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_nb)
+
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_nb,
+                       teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+```
+
+
+## 3. kNN for a classification problem with CARET's train function  
+```{r Your 23 Code Chunk}
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 10)
+teeth_caret_model_knn <- train(Disease ~ ., data = teeth_Num,
+                                  method = "knn", metric = "Accuracy",
+                                  preProcess = c("center", "scale"),
+                                  trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_knn)
+
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_knn,
+                       teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+```
+
+
+## 4. SVM Classifier for a classification problem with CARET 
+```{r Your 24 Code Chunk}
+#### Train the model ----
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_svm_radial <- # nolint: object_length_linter.
+  train(Disease ~ ., data = teeth_disease_train, method = "svmRadial",
+        metric = "Accuracy", trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_svm_radial)
+
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_svm_radial,
+                       teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+table(predictions, teeth_disease_test$Disease)
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+```
+
+#model performance comparison 
+```{r Your 244 Code Chunk}
+train_control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+### CART ----
+set.seed(7)
+teeth_model_cart <- train(Disease ~ ., data = teeth_Num,
+                             method = "rpart", trControl = train_control)
+
+### KNN ----
+set.seed(7)
+teeth_model_knn <- train(Disease ~ ., data = teeth_Num,
+                            method = "knn", trControl = train_control)
+
+### SVM ----
+set.seed(7)
+teeth_model_svm <- train(Disease ~ ., data = teeth_Num,
+                            method = "svmRadial", trControl = train_control)
+
+### naive bayes ----
+set.seed(7)
+teeth_model_nb <- train(Disease ~ ., data = teeth_Num,
+                         method = "nb", trControl = train_control)
+```
+
+##  Call the `resamples` Function 
+We then create a list of the model results and pass the list as an argument
+to the `resamples` function.
+```{r Your 25 Code Chunk}
+results <- resamples(list( CART = teeth_model_cart,
+                          KNN = teeth_model_knn, SVM = teeth_model_svm,
+                          NB = teeth_model_nb))
+```
+
+
+
+##  Display the Results 
+### 1. Table Summary 
+ This is the simplest comparison. It creates a table with one model per row
+ and its corresponding evaluation metrics displayed per column.
+```{r Your 26 Code Chunk}
+summary(results)
+```
+
+
+### 2. Box and Whisker Plot 
+ This is useful for visually observing the spread of the estimated accuracies
+ for different algorithms and how they relate.
+```{r Your 266 Code Chunk}
+scales <- list(x = list(relation = "free"), y = list(relation = "free"))
+bwplot(results, scales = scales)
+```
+
+
+### 3. Dot Plots 
+ They show both the mean estimated accuracy as well as the 95% confidence
+ interval (e.g. the range in which 95% of observed scores fell).
+```{r Your 27 Code Chunk}
+scales <- list(x = list(relation = "free"), y = list(relation = "free"))
+dotplot(results, scales = scales)
+```
+
+
+### 4. Scatter Plot Matrix 
+ This is useful when considering whether the predictions from two
+ different algorithms are correlated. If weakly correlated, then they are good
+ candidates for being combined in an ensemble prediction.
+```{r Your 277 Code Chunk}
+splom(results)
+```
+
+
+### 5. Pairwise xyPlots 
+ You can zoom in on one pairwise comparison of the accuracy of trial-folds for
+ two models using an xyplot.
+```{r Your 28 Code Chunk}
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "SVM"))
+
+
+# xyplot plots to compare models
+xyplot(results, models = c("SVM", "CART"))
+
+
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "CART"))
+
+
+# xyplot plots to compare models
+xyplot(results, models = c("KNN", "NB"))
+
+# or
+# xyplot plots to compare models
+xyplot(results, models = c("NB", "CART"))
+```
+
+
+### 6. Statistical Significance Tests 
+ This is used to calculate the significance of the differences between the
+ metric distributions of the various models.
+
+ Upper Diagonal 
+ The upper diagonal of the table shows the estimated difference between the
+ distributions. If we think that LDA is the most accurate model from looking
+ at the previous graphs, we can get an estimate of how much better it is than
+ specific other models in terms of absolute accuracy.
+
+ Lower Diagonal 
+ The lower diagonal contains p-values of the null hypothesis.
+ The null hypothesis is a claim that "the distributions are the same".
+ A lower p-value is better (more significant).
+```{r Your 29 Code Chunk}
+diffs <- diff(results)
+
+summary(diffs)
+```
+
 
 
 # \<You can Provide Another Appropriate Title Here if you wish\>
