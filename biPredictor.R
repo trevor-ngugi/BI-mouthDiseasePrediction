@@ -95,6 +95,21 @@ if (require("FactoMineR")) {
                    repos = "https://cloud.r-project.org")
 }
 
+## kernlab ----
+if (require("kernlab")) {
+  require("kernlab")
+} else {
+  install.packages("kernlab", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## rpart ----
+if (require("rpart")) {
+  require("rpart")
+} else {
+  install.packages("rpart", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
 
 #loading the datasets ----
 library(readr)
@@ -259,18 +274,85 @@ summary(teeth_Num_yeo_johnson_transform)
 # Calculate the skewness after the Yeo-Johnson transform
 sapply(teeth_Num_yeo_johnson_transform[, -1],  skewness, type = 2)
 
-## 1.c. Split the dataset ----
+## Split the dataset ----
 # Define a 75:25 train:test data split of the dataset.
 # That is, 75% of the original data will be used to train the model and
 # 25% of the original data will be used to test the model.
-
-
-
-
-# STEP 1. Install and Load the Required Packages ----
-
-train_index <- createDataPartition(Data_of_teeth$Disease,
+train_index <- createDataPartition(teeth_Num$Disease,
                                    p = 0.75,
                                    list = FALSE)
-teeth_disease_train <- Data_of_teeth[train_index, ]
-teeth_disease_indians_diabetes_test <- Data_of_teeth[-train_index, ]
+teeth_disease_train <- teeth_Num[train_index, ]
+teeth_disease_test <- teeth_Num[-train_index, ]
+
+### 1.c. Decision tree for a classification problem with caret ----
+#### Train the model ----
+set.seed(7)
+# We apply the 5-fold cross validation resampling method
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_rpart <- train(Disease ~ ., data = teeth_Num,
+                                    method = "rpart", metric = "Accuracy",
+                                    trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_rpart)
+
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_rpart,
+                       teeth_disease_test[, 2:4],
+                       type = "raw")
+
+#### Display the model's evaluation metrics ----
+table(predictions, teeth_disease_test$Disease)
+
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+
+## 2.  Naïve Bayes ----
+#### Train the model ----
+# We apply the 5-fold cross validation resampling method
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 5)
+teeth_caret_model_nb <- train(Disease ~ .,
+                                 data = teeth_disease_train,
+                                 method = "nb", metric = "Accuracy",
+                                 trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_nb)
+
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_nb,
+                       teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+
+### 3.c. kNN for a classification problem with CARET's train function ----
+set.seed(7)
+train_control <- trainControl(method = "cv", number = 10)
+teeth_caret_model_knn <- train(Disease ~ ., data = teeth_Num,
+                                  method = "knn", metric = "Accuracy",
+                                  preProcess = c("center", "scale"),
+                                  trControl = train_control)
+
+#### Display the model's details ----
+print(teeth_caret_model_knn)
+
+#### Make predictions ----
+predictions <- predict(teeth_caret_model_knn,
+                       teeth_disease_test[, 2:4])
+
+#### Display the model's evaluation metrics ----
+confusion_matrix <-
+  caret::confusionMatrix(predictions,
+                         as.factor(teeth_disease_test[, 1:4]$Disease))
+print(confusion_matrix)
+
+
+
+
