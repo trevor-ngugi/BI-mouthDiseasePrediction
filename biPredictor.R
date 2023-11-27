@@ -71,6 +71,30 @@ if (!is.element("ggcorrplot", installed.packages()[, 1])) {
 }
 require("ggcorrplot")
 
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## factoextra ----
+if (require("factoextra")) {
+  require("factoextra")
+} else {
+  install.packages("factoextra", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## FactoMineR ----
+if (require("FactoMineR")) {
+  require("FactoMineR")
+} else {
+  install.packages("FactoMineR", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 
 #loading the datasets ----
 library(readr)
@@ -168,19 +192,72 @@ corrplot(cor(teeth_Num[, 7:9]), method = "circle")
 # more visually appealing plot.
 ggcorrplot(cor(teeth_Num[, 7:9]))
 
+# Confirm the "missingness" in the Dataset before Imputation ----
 # Are there missing values in the dataset?
-
 any_na(Data_of_teeth)
+any_na(teeth_Num)
 
+# How many?
 n_miss(Data_of_teeth)
+n_miss(teeth_Num)
 
+# What is the percentage of missing data in the entire dataset?
 prop_miss(Data_of_teeth)
+prop_miss(teeth_Num)
 
+# How many missing values does each variable have?
 Data_of_teeth %>% is.na() %>% colSums()
+teeth_Num %>% is.na() %>% colSums()
 
+# What is the number and percentage of missing values grouped by
+# each variable?
 miss_var_summary(Data_of_teeth)
+miss_var_summary(teeth_Num)
 
+# remove the column that has misssing data
 Data_of_teeth<-Data_of_teeth[-6]
+teeth_Num<-teeth_Num[-6]
+
+# remove the symptom columns that have character values
+teeth_Num<-teeth_Num[,-1:-3]
+# remove the treatment columns that have character values
+teeth_Num<-teeth_Num[-2]
+
+# confirm if there is missing data
+any_na(Data_of_teeth)
+any_na(teeth_Num)
+
+# standardizing data ----
+#not applicable 
+# BEFORE
+summary(teeth_Num)
+sapply(teeth_Num[, -1], sd)
+
+model_of_the_transform <- preProcess(teeth_Num,
+                                     method = c("scale", "center"))
+print(model_of_the_transform)
+teeth_Num_standardize_transform <- predict(model_of_the_transform, # nolint
+                                           teeth_Num)
+
+# AFTER
+summary(teeth_Num_standardize_transform)
+sapply(teeth_Num_standardize_transform[, -1], sd)
+
+#skewness
+sapply(teeth_Num_standardize_transform[, -1],  skewness, type = 2)
+
+hist(teeth_Num_standardize_transform[, 2], main = names(teeth_Num_standardize_transform)[2])
+
+model_of_the_transform <- preProcess(teeth_Num_standardize_transform, method = c("YeoJohnson"))
+print(model_of_the_transform)
+teeth_Num_yeo_johnson_transform <- predict(model_of_the_transform, # nolint
+                                                teeth_Num_standardize_transform)
+
+# AFTER
+summary(teeth_Num_yeo_johnson_transform)
+
+# Calculate the skewness after the Yeo-Johnson transform
+sapply(teeth_Num_yeo_johnson_transform[, -1],  skewness, type = 2)
 
 ## 1.c. Split the dataset ----
 # Define a 75:25 train:test data split of the dataset.

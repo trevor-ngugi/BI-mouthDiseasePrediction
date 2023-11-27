@@ -18,12 +18,16 @@ Business Intelligence Lab Submission Markdown
       - [univariate plots](#univariate-plots)
           - [Create Box and Whisker Plots for Each Numeric
             Attribute](#create-box-and-whisker-plots-for-each-numeric-attribute)
-          - [Create Bar Plots for Each Categorical Attribute
-            —-](#create-bar-plots-for-each-categorical-attribute--)
-          - [Create a Missingness Map to Identify Missing Data
-            —-](#create-a-missingness-map-to-identify-missing-data--)
+          - [Create Bar Plots for Each Categorical
+            Attribute](#create-bar-plots-for-each-categorical-attribute)
+          - [Create a Missingness Map to Identify Missing
+            Data](#create-a-missingness-map-to-identify-missing-data)
       - [multivariate plots](#multivariate-plots)
-          - [Create a Correlation Plot —-](#create-a-correlation-plot--)
+          - [Create a Correlation Plot](#create-a-correlation-plot)
+  - [preprocessing and data
+    transformation](#preprocessing-and-data-transformation)
+      - [Confirm the “missingness” in the Dataset before Imputation
+        —-](#confirm-the-missingness-in-the-dataset-before-imputation--)
   - [\<You can Provide Another Appropriate Title Here if you
     wish\>](#you-can-provide-another-appropriate-title-here-if-you-wish)
       - [\<You Can Have a Sub-Title Here if you
@@ -416,7 +420,7 @@ boxplot(teeth_Num[, 9], main = names(teeth_Num)[9])
 
 ![](Lab-Submission-Markdown_files/figure-gfm/Your%207%20Code%20Chunk-3.png)<!-- -->
 
-### Create Bar Plots for Each Categorical Attribute —-
+### Create Bar Plots for Each Categorical Attribute
 
 ``` r
 barplot(table(teeth_Num[, 4]), main = names(teeth_Num)[4])
@@ -424,7 +428,7 @@ barplot(table(teeth_Num[, 4]), main = names(teeth_Num)[4])
 
 ![](Lab-Submission-Markdown_files/figure-gfm/Your%208%20Code%20Chunk-1.png)<!-- -->
 
-### Create a Missingness Map to Identify Missing Data —-
+### Create a Missingness Map to Identify Missing Data
 
 ``` r
 missmap(Data_of_teeth, col = c("red", "grey"), legend = TRUE)
@@ -434,7 +438,7 @@ missmap(Data_of_teeth, col = c("red", "grey"), legend = TRUE)
 
 ## multivariate plots
 
-### Create a Correlation Plot —-
+### Create a Correlation Plot
 
 Correlation plots can be used to get an idea of which attributes change
 together. The function “corrplot()” found in the package “corrplot” is
@@ -456,6 +460,141 @@ ggcorrplot(cor(teeth_Num[, 7:9]))
 ```
 
 ![](Lab-Submission-Markdown_files/figure-gfm/Your%2011%20Code%20Chunk-1.png)<!-- -->
+
+# preprocessing and data transformation
+
+## Confirm the “missingness” in the Dataset before Imputation —-
+
+Are there missing values in the dataset?
+
+``` r
+any_na(Data_of_teeth)
+```
+
+    ## [1] TRUE
+
+``` r
+any_na(teeth_Num)
+```
+
+    ## [1] TRUE
+
+How many?
+
+``` r
+n_miss(Data_of_teeth)
+```
+
+    ## [1] 54
+
+``` r
+n_miss(teeth_Num)
+```
+
+    ## [1] 54
+
+What is the percentage of missing data in the entire dataset?
+
+``` r
+prop_miss(Data_of_teeth)
+```
+
+    ## [1] 0.1666667
+
+``` r
+prop_miss(teeth_Num)
+```
+
+    ## [1] 0.1111111
+
+How many missing values does each variable have?
+
+``` r
+Data_of_teeth %>%
+    is.na() %>%
+    colSums()
+```
+
+    ## Symptom 1 Symptom 2 Symptom 3   Disease Treatment      ...6 
+    ##         0         0         0         0         0        54
+
+``` r
+teeth_Num %>%
+    is.na() %>%
+    colSums()
+```
+
+    ## Symptom 1 Symptom 2 Symptom 3   Disease Treatment      ...6  symptom1  symptom2 
+    ##         0         0         0         0         0        54         0         0 
+    ##  symptom3 
+    ##         0
+
+What is the number and percentage of missing values grouped by each
+variable?
+
+``` r
+miss_var_summary(Data_of_teeth)
+```
+
+    ## # A tibble: 6 × 3
+    ##   variable  n_miss pct_miss
+    ##   <chr>      <int>    <dbl>
+    ## 1 ...6          54      100
+    ## 2 Symptom 1      0        0
+    ## 3 Symptom 2      0        0
+    ## 4 Symptom 3      0        0
+    ## 5 Disease        0        0
+    ## 6 Treatment      0        0
+
+``` r
+miss_var_summary(teeth_Num)
+```
+
+    ## # A tibble: 9 × 3
+    ##   variable  n_miss pct_miss
+    ##   <chr>      <int>    <dbl>
+    ## 1 ...6          54      100
+    ## 2 Symptom 1      0        0
+    ## 3 Symptom 2      0        0
+    ## 4 Symptom 3      0        0
+    ## 5 Disease        0        0
+    ## 6 Treatment      0        0
+    ## 7 symptom1       0        0
+    ## 8 symptom2       0        0
+    ## 9 symptom3       0        0
+
+remove the column that has misssing data
+
+``` r
+Data_of_teeth <- Data_of_teeth[-6]
+teeth_Num <- teeth_Num[-6]
+```
+
+remove the symptom columns that have character values
+
+``` r
+teeth_Num <- teeth_Num[, -1:-3]
+```
+
+remove the treatment columns that have character values
+
+``` r
+teeth_Num <- teeth_Num[-2]
+```
+
+confirm if there is missing data
+
+``` r
+any_na(Data_of_teeth)
+```
+
+    ## [1] FALSE
+
+``` r
+any_na(teeth_Num)
+```
+
+    ## [1] FALSE
 
 # \<You can Provide Another Appropriate Title Here if you wish\>
 

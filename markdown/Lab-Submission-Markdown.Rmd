@@ -264,20 +264,20 @@ boxplot(teeth_Num[, 8], main = names(teeth_Num)[8])
 boxplot(teeth_Num[, 9], main = names(teeth_Num)[9])
 ```
 
-###  Create Bar Plots for Each Categorical Attribute ----
+###  Create Bar Plots for Each Categorical Attribute 
 ```{r Your 8 Code Chunk}
 barplot(table(teeth_Num[, 4]), main = names(teeth_Num)[4])
 
 ```
 
-###  Create a Missingness Map to Identify Missing Data ----
+###  Create a Missingness Map to Identify Missing Data 
 ```{r Your 9 Code Chunk}
 missmap(Data_of_teeth, col = c("red", "grey"), legend = TRUE)
 
 ```
 
 ## multivariate plots
-### Create a Correlation Plot ----
+### Create a Correlation Plot 
  Correlation plots can be used to get an idea of which attributes change
  together. The function “corrplot()” found in the package “corrplot” is
  required to perform this. The larger the dot in the correlation plot, the
@@ -292,6 +292,70 @@ corrplot(cor(teeth_Num[, 7:9]), method = "circle")
 ```{r Your 11 Code Chunk}
 ggcorrplot(cor(teeth_Num[, 7:9]))
 ```
+
+# preprocessing and data transformation
+## Confirm the "missingness" in the Dataset before Imputation ----
+ Are there missing values in the dataset?
+```{r Your 12 Code Chunk}
+any_na(Data_of_teeth)
+any_na(teeth_Num)
+``` 
+
+
+How many?
+```{r Your 13 Code Chunk}
+n_miss(Data_of_teeth)
+n_miss(teeth_Num)
+```
+
+
+What is the percentage of missing data in the entire dataset?
+```{r Your 14 Code Chunk}
+prop_miss(Data_of_teeth)
+prop_miss(teeth_Num)
+```
+
+
+How many missing values does each variable have?
+```{r Your 15 Code Chunk}
+Data_of_teeth %>% is.na() %>% colSums()
+teeth_Num %>% is.na() %>% colSums()
+```
+
+
+ What is the number and percentage of missing values grouped by
+ each variable?
+```{r Your 16 Code Chunk}
+miss_var_summary(Data_of_teeth)
+miss_var_summary(teeth_Num)
+```
+
+
+remove the column that has misssing data
+```{r Your 17 Code Chunk}
+Data_of_teeth<-Data_of_teeth[-6]
+teeth_Num<-teeth_Num[-6]
+```
+
+
+ remove the symptom columns that have character values
+```{r Your 18 Code Chunk}
+teeth_Num<-teeth_Num[,-1:-3]
+
+```
+
+ remove the treatment columns that have character values
+```{r Your 19 Code Chunk}
+teeth_Num<-teeth_Num[-2]
+```
+
+
+confirm if there is missing data
+```{r Your 20 Code Chunk}
+any_na(Data_of_teeth)
+any_na(teeth_Num)
+```
+
 
 # \<You can Provide Another Appropriate Title Here if you wish\>
 ```{r Your 0 Code Chunk}
