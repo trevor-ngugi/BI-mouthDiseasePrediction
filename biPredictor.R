@@ -143,6 +143,22 @@ if (require("plumber")) {
                    repos = "https://cloud.r-project.org")
 }
 
+## httr ----
+if (require("httr")) {
+  require("httr")
+} else {
+  install.packages("httr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## jsonlite ----
+if (require("jsonlite")) {
+  require("jsonlite")
+} else {
+  install.packages("jsonlite", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 #loading the datasets ----
 library(readr)
 Data_of_teeth <- read_csv("data/Data of teeth.csv")
@@ -571,7 +587,7 @@ print(teeth_caret_model_knn$finalModel)
 print(teeth_caret_model_nb$finalModel)
 print(teeth_caret_model_rpart$finalModel)
 
-# STEP 4. Test the Model ----
+#  Test the Model ----
 # We can test the model
 set.seed(9)
 predictions <- predict(teeth_caret_model_nb, newdata = teeth_disease_test)
@@ -594,6 +610,31 @@ saveRDS(teeth_caret_model_svm_radial, "./models/saved_teeth_caret_model_svm_radi
 loaded_teeth_caret_model_svm_radial <- readRDS("./models/saved_teeth_caret_model_svm_radial.rds")
 print(loaded_teeth_caret_model_svm_radial)
 
+
+
+# consume the plumber api ----
+get_gumDisease_predictions <-
+  function(arg_symptomOne, arg_symptomTwo, arg_symptomThree) {
+    base_url <- "http://127.0.0.1:5022/gumDisease"
+    
+    params <- list(arg_symptomOne = arg_symptomOne, arg_symptomTwo = arg_symptomTwo,
+                   arg_symptomThree = arg_symptomThree)
+    
+    query_url <- modify_url(url = base_url, query = params)
+    
+    model_prediction <- GET(query_url)
+    
+    model_prediction_raw <- content(model_prediction, as = "text",
+                                    encoding = "utf-8")
+    
+    jsonlite::fromJSON(model_prediction_raw)
+  }
+
+# get oral cancer
+get_gumDisease_predictions(8,7,6)
+
+# gets periodontits
+get_gumDisease_predictions(15,14,2)
 
 
 
