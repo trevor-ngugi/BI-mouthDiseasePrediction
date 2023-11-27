@@ -1,0 +1,247 @@
+---
+title: "Business Intelligence Lab Submission Markdown"
+author: "<trevor ngugi>"
+date: "<27/11/2023>"
+output:
+  github_document: 
+    toc: yes
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    df_print: default
+editor_options:
+  chunk_output_type: console
+---
+
+# Student Details
+
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Student ID Numbers and Names of Group Members** | |
+|                                                   |                                                                                                                                                                          |
+|                                                   | 1.  133996 - B - Trevor ngugi                                                                                                                                              |
+|                                                   |                                                                                                                                                                          |
+|                                                   |                                                                                                                                               |
+|                                                   |                                                                                                                                                                          |
+|                                                   |                                                                                                                                             |
+|                                                   |                                                                                                                                                                          |
+|                                                   |                                                                                                                                               |
+|                                                   |                                                                                                                                                                          |
+|                                                   |                                                                                                                                               |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **GitHub Classroom Group Name**                   | champions                                                                                                       |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Course Code**                                   | BBT4206                                                                                                                                                                  |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Course Name**                                   | Business Intelligence II                                                                                                                                                 |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Program**                                       | Bachelor of Business Information Technology                                                                                                                              |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Semester Duration**                             | 21^st^ August 2023 to 28^th^ November 2023                                                                                                                               |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+# Setup Chunk
+
+We start by installing all the required packages
+
+```{r Install Packages, echo=TRUE, message=FALSE, warning=FALSE}
+## formatR - Required to format R code in the markdown ----
+if (!is.element("formatR", installed.packages()[, 1])) {
+  install.packages("formatR", dependencies = TRUE,
+                   repos="https://cloud.r-project.org")
+}
+require("formatR")
+
+
+## readr - Load datasets from CSV files ----
+if (!is.element("readr", installed.packages()[, 1])) {
+  install.packages("readr", dependencies = TRUE,
+                   repos="https://cloud.r-project.org")
+}
+require("readr")
+
+## MICE ----
+# We use the MICE package to perform data imputation
+if (!is.element("mice", installed.packages()[, 1])) {
+  install.packages("mice", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+require("mice")
+## dplyr ----
+if (!is.element("dplyr", installed.packages()[, 1])) {
+  install.packages("dplyr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+require("dplyr")
+#naniar ----
+if (!is.element("naniar", installed.packages()[, 1])) {
+  install.packages("naniar", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+require("naniar")
+# Amelia ----
+if (!is.element("Amelia", installed.packages()[, 1])) {
+  install.packages("Amelia", dependencies = TRUE)
+}
+require("Amelia")
+# corrplot ----
+if (!is.element("corrplot", installed.packages()[, 1])) {
+  install.packages("corrplot", dependencies = TRUE)
+}
+require("corrplot")
+## ggplot2 ----
+if (require("ggplot2")) {
+  require("ggplot2")
+} else {
+  install.packages("ggplot2", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## mlbench ----
+if (require("mlbench")) {
+  require("mlbench")
+} else {
+  install.packages("mlbench", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## pROC ----
+if (require("pROC")) {
+  require("pROC")
+} else {
+  install.packages("pROC", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+# language server ----
+if (require("languageserver")) {
+  require("languageserver")
+} else {
+  install.packages("languageserver", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+```
+
+------------------------------------------------------------------------
+
+**Note:** the following "*KnitR*" options have been set as the defaults in this markdown:\
+`knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = TRUE, collapse = FALSE, tidy.opts = list(width.cutoff = 80), tidy = TRUE)`.
+
+More KnitR options are documented here <https://bookdown.org/yihui/rmarkdown-cookbook/chunk-options.html> and here <https://yihui.org/knitr/options/>.
+
+```{r setup, echo=TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(
+	eval = TRUE,
+	echo = TRUE,
+	warning = FALSE,
+	collapse = FALSE,
+	tidy = TRUE
+)
+```
+
+------------------------------------------------------------------------
+
+**Note:** the following "*R Markdown*" options have been set as the defaults in this markdown:
+
+> output:\
+> \
+> github_document:\
+> toc: yes\
+> toc_depth: 4\
+> fig_width: 6\
+> fig_height: 4\
+> df_print: default\
+> \
+> editor_options:\
+> chunk_output_type: console
+
+
+# Loading the gum disease Dataset
+
+The gum disease datatset is then loaded. The dataset and its metadata are available here: <https://drive.google.com/drive/folders/1-BGEhfOwquXF6KKXwcvrx7WuZXuqmW9q?usp=sharing>
+```{r Your 0 Code Chunk}
+# yes working
+```
+
+```{r Your 1 Code Chunk}
+library(readr)
+Data_of_teeth <- read_csv("../data/Data of teeth.csv")
+
+```
+
+# Explatory data analysis 
+## Dimensions 
+ Dimensions refer to the number of observations (rows) and the number of
+ attributes/variables/features (columns). Execute the following commands to
+ display the dimensions of your datasets:
+```{r Your 2 Code Chunk}
+dim(Data_of_teeth)
+```
+
+## Data Types 
+ Knowing the data types will help you to identify the most appropriate
+ visualization types and algorithms that can be applied. It can also help you
+ to identify the need to convert from categorical data (factors) to integers
+ or vice versa where necessary. Execute the following command to identify the
+ data types:
+```{r Your 3 Code Chunk}
+sapply(Data_of_teeth, class)
+```
+
+# Descriptive Statistics 
+## Measures of Frequency 
+```{r Your 4 Code Chunk}
+disease_density_freq <- Data_of_teeth$Disease
+cbind(frequency = table(disease_density_freq), percentage = prop.table(table(disease_density_freq)) *
+        100)
+
+symptom1_density_freq <- Data_of_teeth$"Symptom 1"
+cbind(frequency = table(symptom1_density_freq), percentage = prop.table(table(symptom1_density_freq)) *
+        100)
+
+symptom2_density_freq <- Data_of_teeth$"Symptom 2"
+cbind(frequency = table(symptom2_density_freq), percentage = prop.table(table(symptom2_density_freq)) *
+        100)
+symptom3_density_freq <- Data_of_teeth$"Symptom 3"
+cbind(frequency = table(symptom3_density_freq), percentage = prop.table(table(symptom3_density_freq)) *
+        100)
+treatment_density_freq <- Data_of_teeth$Treatment
+cbind(frequency = table(treatment_density_freq), percentage = prop.table(table(treatment_density_freq)) *
+        100)
+```
+
+
+## Measures of Distribution/Dispersion/Spread/Scatter/Variability ----
+```{r Your 5 Code Chunk}
+summary(Data_of_teeth)
+```
+
+
+
+# \<You can Provide Another Appropriate Title Here if you wish\>
+
+Describe the code chunk here:
+
+```{r Your Sixth Code Chunk}
+# Fill this with R related code that will be executed when the R markdown file
+```
+
+## \<You Can Have a Sub-Title Here if you wish\>
+
+```{r Your Seventh Code Chunk}
+# Fill this with other R related code that will be executed when the R markdown
+```
+
+## \<You Can Have Another Sub-Title Here if you wish\>
+
+```{r Your Eighth Code Chunk}
+# Fill this with other R related code that will be executed when the R markdown
+```
+
+**etc.** as per the lab submission requirements. Be neat and communicate in a clear and logical manner.
