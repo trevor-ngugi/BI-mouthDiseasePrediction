@@ -240,7 +240,7 @@ knitr::opts_chunk$set(
 
 # Loading the gum disease Dataset
 
-The gum disease datatset is then loaded. The dataset and its metadata are available here: <https://drive.google.com/drive/folders/1-BGEhfOwquXF6KKXwcvrx7WuZXuqmW9q?usp=sharing>
+The gum disease datatset is then loaded. The dataset and its metadata are available here: <https://www.kaggle.com/datasets/kruphacm/7-common-teeth-disease-dataset>
 
 
 ```{r Your 1 Code Chunk}
@@ -759,27 +759,3 @@ saveRDS(teeth_caret_model_svm_radial, "../models/saved_teeth_caret_model_svm_rad
 ```
 
 
-
-# \<You can Provide Another Appropriate Title Here if you wish\>
-```{r Your 0 Code Chunk}
-# yes working
-```
-Describe the code chunk here:
-
-```{r Your Sixth Code Chunk}
-# Fill this with R related code that will be executed when the R markdown file
-```
-
-## \<You Can Have a Sub-Title Here if you wish\>
-
-```{r Your Seventh Code Chunk}
-# Fill this with other R related code that will be executed when the R markdown
-```
-
-## \<You Can Have Another Sub-Title Here if you wish\>
-
-```{r Your Eighth Code Chunk}
-# Fill this with other R related code that will be executed when the R markdown
-```
-
-**etc.** as per the lab submission requirements. Be neat and communicate in a clear and logical manner.
