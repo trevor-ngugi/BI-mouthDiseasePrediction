@@ -194,6 +194,14 @@ if (require("adabag")) {
                    repos = "https://cloud.r-project.org")
 }
 
+## plumber ----
+if (require("plumber")) {
+  require("plumber")
+} else {
+  install.packages("plumber", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 ```
 
 ------------------------------------------------------------------------
@@ -703,6 +711,51 @@ dotplot(results)
 # correlation between results
 modelCor(results)
 splom(results)
+```
+
+# saving the model 
+ We print a summary of what caret has done
+```{r Your 32 Code Chunk}
+print(teeth_caret_model_svm_radial)
+print(teeth_caret_model_knn)
+print(teeth_caret_model_nb)
+print(teeth_caret_model_rpart)
+```
+
+
+ We then print the details of the model that has been created
+```{r Your 33 Code Chunk}
+print(teeth_caret_model_svm_radial$finalModel)
+print(teeth_caret_model_knn$finalModel)
+print(teeth_caret_model_nb$finalModel)
+print(teeth_caret_model_rpart$finalModel)
+```
+
+
+##  Test the Model 
+```{r Your 34 Code Chunk}
+# We can test the model
+set.seed(9)
+predictions <- predict(teeth_caret_model_nb, newdata = teeth_disease_test)
+confusionMatrix(predictions,as.factor(teeth_disease_test$Disease))
+
+set.seed(9)
+predictions <- predict(teeth_caret_model_svm_radial, newdata = teeth_disease_test)
+confusionMatrix(predictions,as.factor(teeth_disease_test$Disease))
+
+set.seed(9)
+predictions <- predict(teeth_caret_model_knn, newdata = teeth_disease_test)
+confusionMatrix(predictions,as.factor(teeth_disease_test$Disease))
+
+set.seed(9)
+predictions <- predict(teeth_caret_model_rpart, newdata = teeth_disease_test)
+confusionMatrix(predictions,as.factor(teeth_disease_test$Disease))
+```
+
+
+save the model with following code
+```{r Your 35 Code Chunk}
+saveRDS(teeth_caret_model_svm_radial, "../models/saved_teeth_caret_model_svm_radial.rds")
 ```
 
 

@@ -49,6 +49,8 @@ Business Intelligence Lab Submission Markdown
   - [Stacking](#stacking)
       - [Example of Stacking
         algorithms](#example-of-stacking-algorithms)
+  - [saving the model](#saving-the-model)
+      - [Test the Model](#test-the-model)
   - [\<You can Provide Another Appropriate Title Here if you
     wish\>](#you-can-provide-another-appropriate-title-here-if-you-wish)
       - [\<You Can Have a Sub-Title Here if you
@@ -245,6 +247,14 @@ if (require("adabag")) {
   require("adabag")
 } else {
   install.packages("adabag", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## plumber ----
+if (require("plumber")) {
+  require("plumber")
+} else {
+  install.packages("plumber", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
 ```
@@ -737,19 +747,19 @@ table(predictions, teeth_disease_test$Disease)
 
     ##                          
     ## predictions               cavity dentin hypersensitivity Mouth Sores
-    ##   cavity                       1                       0           0
+    ##   cavity                       0                       0           0
     ##   dentin hypersensitivity      0                       0           0
     ##   Mouth Sores                  0                       0           0
-    ##   Oral Cancer                  0                       0           0
-    ##   Periodontitis                0                       1           1
+    ##   Oral Cancer                  1                       0           1
+    ##   Periodontitis                0                       1           0
     ##   Tooth Erosion                0                       0           0
     ##                          
     ## predictions               Oral Cancer Periodontitis Tooth Erosion
     ##   cavity                            0             0             0
     ##   dentin hypersensitivity           0             0             0
     ##   Mouth Sores                       0             0             0
-    ##   Oral Cancer                       1             0             0
-    ##   Periodontitis                     0             6             1
+    ##   Oral Cancer                       1             0             1
+    ##   Periodontitis                     0             6             0
     ##   Tooth Erosion                     0             0             0
 
 ``` r
@@ -762,52 +772,52 @@ print(confusion_matrix)
     ## 
     ##                          Reference
     ## Prediction                cavity dentin hypersensitivity Mouth Sores
-    ##   cavity                       1                       0           0
+    ##   cavity                       0                       0           0
     ##   dentin hypersensitivity      0                       0           0
     ##   Mouth Sores                  0                       0           0
-    ##   Oral Cancer                  0                       0           0
-    ##   Periodontitis                0                       1           1
+    ##   Oral Cancer                  1                       0           1
+    ##   Periodontitis                0                       1           0
     ##   Tooth Erosion                0                       0           0
     ##                          Reference
     ## Prediction                Oral Cancer Periodontitis Tooth Erosion
     ##   cavity                            0             0             0
     ##   dentin hypersensitivity           0             0             0
     ##   Mouth Sores                       0             0             0
-    ##   Oral Cancer                       1             0             0
-    ##   Periodontitis                     0             6             1
+    ##   Oral Cancer                       1             0             1
+    ##   Periodontitis                     0             6             0
     ##   Tooth Erosion                     0             0             0
     ## 
     ## Overall Statistics
     ##                                           
-    ##                Accuracy : 0.7273          
-    ##                  95% CI : (0.3903, 0.9398)
+    ##                Accuracy : 0.6364          
+    ##                  95% CI : (0.3079, 0.8907)
     ##     No Information Rate : 0.5455          
-    ##     P-Value [Acc > NIR] : 0.1829          
+    ##     P-Value [Acc > NIR] : 0.3853          
     ##                                           
-    ##                   Kappa : 0.4923          
+    ##                   Kappa : 0.4133          
     ##                                           
     ##  Mcnemar's Test P-Value : NA              
     ## 
     ## Statistics by Class:
     ## 
     ##                      Class: cavity Class: dentin hypersensitivity
-    ## Sensitivity                1.00000                        0.00000
+    ## Sensitivity                0.00000                        0.00000
     ## Specificity                1.00000                        1.00000
-    ## Pos Pred Value             1.00000                            NaN
-    ## Neg Pred Value             1.00000                        0.90909
+    ## Pos Pred Value                 NaN                            NaN
+    ## Neg Pred Value             0.90909                        0.90909
     ## Prevalence                 0.09091                        0.09091
-    ## Detection Rate             0.09091                        0.00000
-    ## Detection Prevalence       0.09091                        0.00000
-    ## Balanced Accuracy          1.00000                        0.50000
+    ## Detection Rate             0.00000                        0.00000
+    ## Detection Prevalence       0.00000                        0.00000
+    ## Balanced Accuracy          0.50000                        0.50000
     ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
     ## Sensitivity                     0.00000            1.00000               1.0000
-    ## Specificity                     1.00000            1.00000               0.4000
-    ## Pos Pred Value                      NaN            1.00000               0.6667
+    ## Specificity                     1.00000            0.70000               0.8000
+    ## Pos Pred Value                      NaN            0.25000               0.8571
     ## Neg Pred Value                  0.90909            1.00000               1.0000
     ## Prevalence                      0.09091            0.09091               0.5455
     ## Detection Rate                  0.00000            0.09091               0.5455
-    ## Detection Prevalence            0.00000            0.09091               0.8182
-    ## Balanced Accuracy               0.50000            1.00000               0.7000
+    ## Detection Prevalence            0.00000            0.36364               0.6364
+    ## Balanced Accuracy               0.50000            0.85000               0.9000
     ##                      Class: Tooth Erosion
     ## Sensitivity                       0.00000
     ## Specificity                       1.00000
@@ -844,8 +854,8 @@ print(teeth_caret_model_nb)
     ## Resampling results across tuning parameters:
     ## 
     ##   usekernel  Accuracy   Kappa    
-    ##   FALSE      0.4638889  0.1858009
-    ##    TRUE      0.7194444  0.6113501
+    ##   FALSE      0.4666667  0.1741855
+    ##    TRUE      0.7416667  0.6475088
     ## 
     ## Tuning parameter 'fL' was held constant at a value of 0
     ## Tuning
@@ -868,11 +878,11 @@ print(confusion_matrix)
     ## 
     ##                          Reference
     ## Prediction                cavity dentin hypersensitivity Mouth Sores
-    ##   cavity                       0                       0           0
+    ##   cavity                       1                       0           1
     ##   dentin hypersensitivity      0                       0           0
     ##   Mouth Sores                  0                       0           0
     ##   Oral Cancer                  0                       0           0
-    ##   Periodontitis                1                       1           1
+    ##   Periodontitis                0                       1           0
     ##   Tooth Erosion                0                       0           0
     ##                          Reference
     ## Prediction                Oral Cancer Periodontitis Tooth Erosion
@@ -885,35 +895,35 @@ print(confusion_matrix)
     ## 
     ## Overall Statistics
     ##                                           
-    ##                Accuracy : 0.7273          
-    ##                  95% CI : (0.3903, 0.9398)
+    ##                Accuracy : 0.8182          
+    ##                  95% CI : (0.4822, 0.9772)
     ##     No Information Rate : 0.5455          
-    ##     P-Value [Acc > NIR] : 0.1829          
+    ##     P-Value [Acc > NIR] : 0.0615          
     ##                                           
-    ##                   Kappa : 0.4923          
+    ##                   Kappa : 0.7067          
     ##                                           
     ##  Mcnemar's Test P-Value : NA              
     ## 
     ## Statistics by Class:
     ## 
     ##                      Class: cavity Class: dentin hypersensitivity
-    ## Sensitivity                0.00000                        0.00000
-    ## Specificity                1.00000                        1.00000
-    ## Pos Pred Value                 NaN                            NaN
-    ## Neg Pred Value             0.90909                        0.90909
+    ## Sensitivity                1.00000                        0.00000
+    ## Specificity                0.90000                        1.00000
+    ## Pos Pred Value             0.50000                            NaN
+    ## Neg Pred Value             1.00000                        0.90909
     ## Prevalence                 0.09091                        0.09091
-    ## Detection Rate             0.00000                        0.00000
-    ## Detection Prevalence       0.00000                        0.00000
-    ## Balanced Accuracy          0.50000                        0.50000
+    ## Detection Rate             0.09091                        0.00000
+    ## Detection Prevalence       0.18182                        0.00000
+    ## Balanced Accuracy          0.95000                        0.50000
     ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
     ## Sensitivity                     0.00000            1.00000               1.0000
-    ## Specificity                     1.00000            1.00000               0.4000
-    ## Pos Pred Value                      NaN            1.00000               0.6667
+    ## Specificity                     1.00000            1.00000               0.8000
+    ## Pos Pred Value                      NaN            1.00000               0.8571
     ## Neg Pred Value                  0.90909            1.00000               1.0000
     ## Prevalence                      0.09091            0.09091               0.5455
     ## Detection Rate                  0.00000            0.09091               0.5455
-    ## Detection Prevalence            0.00000            0.09091               0.8182
-    ## Balanced Accuracy               0.50000            1.00000               0.7000
+    ## Detection Prevalence            0.00000            0.09091               0.6364
+    ## Balanced Accuracy               0.50000            1.00000               0.9000
     ##                      Class: Tooth Erosion
     ## Sensitivity                       1.00000
     ## Specificity                       1.00000
@@ -1053,11 +1063,11 @@ print(teeth_caret_model_svm_radial)
     ##   C     Accuracy   Kappa    
     ##   0.25  0.4166667  0.0000000
     ##   0.50  0.5333333  0.2452381
-    ##   1.00  0.5333333  0.2452381
+    ##   1.00  0.4666667  0.1741855
     ## 
-    ## Tuning parameter 'sigma' was held constant at a value of 0.3597508
+    ## Tuning parameter 'sigma' was held constant at a value of 0.1785134
     ## Accuracy was used to select the optimal model using the largest value.
-    ## The final values used for the model were sigma = 0.3597508 and C = 0.5.
+    ## The final values used for the model were sigma = 0.1785134 and C = 0.5.
 
 ``` r
 #### Make predictions ----
@@ -1430,6 +1440,800 @@ splom(results)
 ```
 
 ![](Lab-Submission-Markdown_files/figure-gfm/Your%2031%20Code%20Chunk-1.png)<!-- -->
+
+# saving the model
+
+We print a summary of what caret has done
+
+``` r
+print(teeth_caret_model_svm_radial)
+```
+
+    ## Support Vector Machines with Radial Basis Function Kernel 
+    ## 
+    ## 43 samples
+    ##  3 predictor
+    ##  6 classes: 'cavity', 'dentin hypersensitivity', 'Mouth Sores', 'Oral Cancer', 'Periodontitis', 'Tooth Erosion' 
+    ## 
+    ## No pre-processing
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 35, 34, 34, 34, 35 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   C     Accuracy   Kappa    
+    ##   0.25  0.4166667  0.0000000
+    ##   0.50  0.5333333  0.2452381
+    ##   1.00  0.4666667  0.1741855
+    ## 
+    ## Tuning parameter 'sigma' was held constant at a value of 0.1785134
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final values used for the model were sigma = 0.1785134 and C = 0.5.
+
+``` r
+print(teeth_caret_model_knn)
+```
+
+    ## k-Nearest Neighbors 
+    ## 
+    ## 54 samples
+    ##  3 predictor
+    ##  6 classes: 'cavity', 'dentin hypersensitivity', 'Mouth Sores', 'Oral Cancer', 'Periodontitis', 'Tooth Erosion' 
+    ## 
+    ## Pre-processing: centered (3), scaled (3) 
+    ## Resampling: Cross-Validated (10 fold) 
+    ## Summary of sample sizes: 50, 49, 48, 47, 47, 48, ... 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   k  Accuracy   Kappa    
+    ##   5  0.5633333  0.2768057
+    ##   7  0.5633333  0.2160556
+    ##   9  0.5633333  0.2160556
+    ## 
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final value used for the model was k = 9.
+
+``` r
+print(teeth_caret_model_nb)
+```
+
+    ## Naive Bayes 
+    ## 
+    ## 43 samples
+    ##  3 predictor
+    ##  6 classes: 'cavity', 'dentin hypersensitivity', 'Mouth Sores', 'Oral Cancer', 'Periodontitis', 'Tooth Erosion' 
+    ## 
+    ## No pre-processing
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 35, 34, 34, 34, 35 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   usekernel  Accuracy   Kappa    
+    ##   FALSE      0.4666667  0.1741855
+    ##    TRUE      0.7416667  0.6475088
+    ## 
+    ## Tuning parameter 'fL' was held constant at a value of 0
+    ## Tuning
+    ##  parameter 'adjust' was held constant at a value of 1
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final values used for the model were fL = 0, usekernel = TRUE and adjust
+    ##  = 1.
+
+``` r
+print(teeth_caret_model_rpart)
+```
+
+    ## CART 
+    ## 
+    ## 54 samples
+    ##  3 predictor
+    ##  6 classes: 'cavity', 'dentin hypersensitivity', 'Mouth Sores', 'Oral Cancer', 'Periodontitis', 'Tooth Erosion' 
+    ## 
+    ## No pre-processing
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 43, 44, 43, 44, 42 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   cp    Accuracy   Kappa    
+    ##   0.00  0.5381818  0.3276063
+    ##   0.05  0.5381818  0.3276063
+    ##   0.10  0.5181818  0.2488184
+    ## 
+    ## Accuracy was used to select the optimal model using the largest value.
+    ## The final value used for the model was cp = 0.05.
+
+We then print the details of the model that has been created
+
+``` r
+print(teeth_caret_model_svm_radial$finalModel)
+```
+
+    ## Support Vector Machine object of class "ksvm" 
+    ## 
+    ## SV type: C-svc  (classification) 
+    ##  parameter : cost C = 0.5 
+    ## 
+    ## Gaussian Radial Basis kernel function. 
+    ##  Hyperparameter : sigma =  0.178513433186644 
+    ## 
+    ## Number of Support Vectors : 37 
+    ## 
+    ## Objective Function Value : -4.601 -4.7862 -4.2919 -4.7069 -4.5506 -4.6872 -3.2545 -4.8692 -4.8171 -3.5166 -4.932 -4.7747 -3.3726 -3.1853 -4.8076 
+    ## Training error : 0.465116
+
+``` r
+print(teeth_caret_model_knn$finalModel)
+```
+
+    ## 9-nearest neighbor model
+    ## Training set outcome distribution:
+    ## 
+    ##                  cavity dentin hypersensitivity             Mouth Sores 
+    ##                       6                       6                       6 
+    ##             Oral Cancer           Periodontitis           Tooth Erosion 
+    ##                       6                      24                       6
+
+``` r
+print(teeth_caret_model_nb$finalModel)
+```
+
+    ## $apriori
+    ## grouping
+    ##                  cavity dentin hypersensitivity             Mouth Sores 
+    ##               0.1162791               0.1162791               0.1162791 
+    ##             Oral Cancer           Periodontitis           Tooth Erosion 
+    ##               0.1162791               0.4186047               0.1162791 
+    ## 
+    ## $tables
+    ## $tables$symptom1
+    ## $tables$symptom1$cavity
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 0.9736
+    ## 
+    ##        x                  y            
+    ##  Min.   : 0.07925   Min.   :5.119e-05  
+    ##  1st Qu.: 4.03962   1st Qu.:4.537e-03  
+    ##  Median : 8.00000   Median :3.527e-02  
+    ##  Mean   : 8.00000   Mean   :6.301e-02  
+    ##  3rd Qu.:11.96038   3rd Qu.:9.918e-02  
+    ##  Max.   :15.92075   Max.   :1.940e-01  
+    ## 
+    ## $tables$symptom1$`dentin hypersensitivity`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 3.894
+    ## 
+    ##        x                  y            
+    ##  Min.   :-10.6830   Min.   :0.0002301  
+    ##  1st Qu.: -0.5915   1st Qu.:0.0066567  
+    ##  Median :  9.5000   Median :0.0244934  
+    ##  Mean   :  9.5000   Mean   :0.0247295  
+    ##  3rd Qu.: 19.5915   3rd Qu.:0.0436925  
+    ##  Max.   : 29.6830   Max.   :0.0488429  
+    ## 
+    ## $tables$symptom1$`Mouth Sores`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 1.947
+    ## 
+    ##        x                y            
+    ##  Min.   :-1.842   Min.   :0.0004606  
+    ##  1st Qu.: 4.079   1st Qu.:0.0144841  
+    ##  Median :10.000   Median :0.0331564  
+    ##  Mean   :10.000   Mean   :0.0421498  
+    ##  3rd Qu.:15.921   3rd Qu.:0.0755700  
+    ##  Max.   :21.842   Max.   :0.0970064  
+    ## 
+    ## $tables$symptom1$`Oral Cancer`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 0.4868
+    ## 
+    ##        x              y           
+    ##  Min.   :4.54   Min.   :0.001841  
+    ##  1st Qu.:5.77   1st Qu.:0.050646  
+    ##  Median :7.00   Median :0.205948  
+    ##  Mean   :7.00   Mean   :0.202861  
+    ##  3rd Qu.:8.23   3rd Qu.:0.360453  
+    ##  Max.   :9.46   Max.   :0.394462  
+    ## 
+    ## $tables$symptom1$Periodontitis
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (18 obs.);  Bandwidth 'bw' = 0.9419
+    ## 
+    ##        x                 y            
+    ##  Min.   :-0.8258   Min.   :0.0000000  
+    ##  1st Qu.: 4.3371   1st Qu.:0.0001397  
+    ##  Median : 9.5000   Median :0.0152544  
+    ##  Mean   : 9.5000   Mean   :0.0483441  
+    ##  3rd Qu.:14.6629   3rd Qu.:0.0885276  
+    ##  Max.   :19.8258   Max.   :0.1892684  
+    ## 
+    ## $tables$symptom1$`Tooth Erosion`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 4.187
+    ## 
+    ##        x                y            
+    ##  Min.   :-7.561   Min.   :0.0002294  
+    ##  1st Qu.: 2.220   1st Qu.:0.0055731  
+    ##  Median :12.000   Median :0.0284270  
+    ##  Mean   :12.000   Mean   :0.0255156  
+    ##  3rd Qu.:21.780   3rd Qu.:0.0407478  
+    ##  Max.   :31.561   Max.   :0.0530324  
+    ## 
+    ## 
+    ## $tables$symptom2
+    ## $tables$symptom2$cavity
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 3.377
+    ## 
+    ##        x                 y            
+    ##  Min.   :-7.1306   Min.   :0.0005304  
+    ##  1st Qu.: 0.4347   1st Qu.:0.0085903  
+    ##  Median : 8.0000   Median :0.0392604  
+    ##  Mean   : 8.0000   Mean   :0.0329772  
+    ##  3rd Qu.:15.5653   3rd Qu.:0.0494280  
+    ##  Max.   :23.1306   Max.   :0.0692892  
+    ## 
+    ## $tables$symptom2$`dentin hypersensitivity`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 5.546
+    ## 
+    ##        x                y            
+    ##  Min.   :-15.64   Min.   :0.0003234  
+    ##  1st Qu.: -3.07   1st Qu.:0.0050760  
+    ##  Median :  9.50   Median :0.0230529  
+    ##  Mean   :  9.50   Mean   :0.0198485  
+    ##  3rd Qu.: 22.07   3rd Qu.:0.0329512  
+    ##  Max.   : 34.64   Max.   :0.0357577  
+    ## 
+    ## $tables$symptom2$`Mouth Sores`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 3.501
+    ## 
+    ##        x                y            
+    ##  Min.   :-6.502   Min.   :0.0002646  
+    ##  1st Qu.: 1.749   1st Qu.:0.0064950  
+    ##  Median :10.000   Median :0.0328511  
+    ##  Mean   :10.000   Mean   :0.0302458  
+    ##  3rd Qu.:18.251   3rd Qu.:0.0498775  
+    ##  Max.   :26.502   Max.   :0.0614004  
+    ## 
+    ## $tables$symptom2$`Oral Cancer`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 0.6523
+    ## 
+    ##        x               y           
+    ##  Min.   :4.043   Min.   :0.002751  
+    ##  1st Qu.:5.522   1st Qu.:0.043216  
+    ##  Median :7.000   Median :0.195923  
+    ##  Mean   :7.000   Mean   :0.168751  
+    ##  3rd Qu.:8.478   3rd Qu.:0.280986  
+    ##  Max.   :9.957   Max.   :0.297346  
+    ## 
+    ## $tables$symptom2$Periodontitis
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (18 obs.);  Bandwidth 'bw' = 3.128
+    ## 
+    ##        x                y            
+    ##  Min.   :-7.383   Min.   :0.0003709  
+    ##  1st Qu.: 1.058   1st Qu.:0.0096994  
+    ##  Median : 9.500   Median :0.0232565  
+    ##  Mean   : 9.500   Mean   :0.0295654  
+    ##  3rd Qu.:17.942   3rd Qu.:0.0392458  
+    ##  Max.   :26.383   Max.   :0.0852167  
+    ## 
+    ## $tables$symptom2$`Tooth Erosion`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 4.649
+    ## 
+    ##        x                y            
+    ##  Min.   :-8.948   Min.   :0.0003853  
+    ##  1st Qu.: 1.526   1st Qu.:0.0061340  
+    ##  Median :12.000   Median :0.0280353  
+    ##  Mean   :12.000   Mean   :0.0238201  
+    ##  3rd Qu.:22.474   3rd Qu.:0.0366694  
+    ##  Max.   :32.948   Max.   :0.0483652  
+    ## 
+    ## 
+    ## $tables$symptom3
+    ## $tables$symptom3$cavity
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 3.142
+    ## 
+    ##        x                 y           
+    ##  Min.   :-6.4257   Min.   :0.000354  
+    ##  1st Qu.: 0.7871   1st Qu.:0.007956  
+    ##  Median : 8.0000   Median :0.040026  
+    ##  Mean   : 8.0000   Mean   :0.034597  
+    ##  3rd Qu.:15.2129   3rd Qu.:0.053056  
+    ##  Max.   :22.4257   Max.   :0.074127  
+    ## 
+    ## $tables$symptom3$`dentin hypersensitivity`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 4.381
+    ## 
+    ##        x                 y            
+    ##  Min.   :-12.143   Min.   :0.0002047  
+    ##  1st Qu.: -1.322   1st Qu.:0.0053793  
+    ##  Median :  9.500   Median :0.0236097  
+    ##  Mean   :  9.500   Mean   :0.0230609  
+    ##  3rd Qu.: 20.322   3rd Qu.:0.0413397  
+    ##  Max.   : 31.143   Max.   :0.0446001  
+    ## 
+    ## $tables$symptom3$`Mouth Sores`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 3.957
+    ## 
+    ##        x                y            
+    ##  Min.   :-7.871   Min.   :0.0004521  
+    ##  1st Qu.: 1.064   1st Qu.:0.0071216  
+    ##  Median :10.000   Median :0.0326888  
+    ##  Mean   :10.000   Mean   :0.0279209  
+    ##  3rd Qu.:18.936   3rd Qu.:0.0437994  
+    ##  Max.   :27.871   Max.   :0.0552602  
+    ## 
+    ## $tables$symptom3$`Oral Cancer`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 0.4868
+    ## 
+    ##        x              y           
+    ##  Min.   :4.54   Min.   :0.001841  
+    ##  1st Qu.:5.77   1st Qu.:0.050646  
+    ##  Median :7.00   Median :0.205948  
+    ##  Mean   :7.00   Mean   :0.202861  
+    ##  3rd Qu.:8.23   3rd Qu.:0.360453  
+    ##  Max.   :9.46   Max.   :0.394462  
+    ## 
+    ## $tables$symptom3$Periodontitis
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (18 obs.);  Bandwidth 'bw' = 0.3768
+    ## 
+    ##        x                 y            
+    ##  Min.   : 0.8697   Min.   :0.000e+00  
+    ##  1st Qu.: 5.1848   1st Qu.:0.000e+00  
+    ##  Median : 9.5000   Median :1.409e-05  
+    ##  Mean   : 9.5000   Mean   :5.785e-02  
+    ##  3rd Qu.:13.8152   3rd Qu.:8.576e-02  
+    ##  Max.   :18.1303   Max.   :3.039e-01  
+    ## 
+    ## $tables$symptom3$`Tooth Erosion`
+    ## 
+    ## Call:
+    ##  density.default(x = xx, adjust = ..1)
+    ## 
+    ## Data: xx (5 obs.);   Bandwidth 'bw' = 1.947
+    ## 
+    ##        x                 y            
+    ##  Min.   :-0.8415   Min.   :0.0004605  
+    ##  1st Qu.: 5.5792   1st Qu.:0.0086213  
+    ##  Median :12.0000   Median :0.0289675  
+    ##  Mean   :12.0000   Mean   :0.0388676  
+    ##  3rd Qu.:18.4208   3rd Qu.:0.0697068  
+    ##  Max.   :24.8415   Max.   :0.0970082  
+    ## 
+    ## 
+    ## 
+    ## $levels
+    ## [1] "cavity"                  "dentin hypersensitivity"
+    ## [3] "Mouth Sores"             "Oral Cancer"            
+    ## [5] "Periodontitis"           "Tooth Erosion"          
+    ## 
+    ## $call
+    ## NaiveBayes.default(x = x, grouping = y, usekernel = TRUE, fL = param$fL, 
+    ##     adjust = param$adjust)
+    ## 
+    ## $x
+    ##     symptom1 symptom2 symptom3
+    ## X1        10        1       18
+    ## X2        10       18        1
+    ## X3         1       18       10
+    ## X4        18       10        1
+    ## X5        18        1       10
+    ## X6         3       13       11
+    ## X7        11        3       13
+    ## X8        11       13        3
+    ## X9        13        3       11
+    ## X10       13       11        3
+    ## X11       19        5        9
+    ## X12       19        9        5
+    ## X13        5       19        9
+    ## X14        9       19        5
+    ## X15        9        5       19
+    ## X16        4       12       16
+    ## X17       12        4       16
+    ## X18       12       16        4
+    ## X19       16        4       12
+    ## X20       16       12        4
+    ## X21        8        7        6
+    ## X22        8        6        7
+    ## X23        7        8        6
+    ## X24        7        6        8
+    ## X25        6        8        7
+    ## X26        2       14       15
+    ## X27        2       15       14
+    ## X28        2       17       14
+    ## X29        2       15       17
+    ## X30       14        2       15
+    ## X31       14       17       15
+    ## X32       14       15       17
+    ## X33       14       17        2
+    ## X34       15        2       14
+    ## X35       15       14        2
+    ## X36       15       17       14
+    ## X37       15        2       17
+    ## X38       15       14       17
+    ## X39       17       14        2
+    ## X40       17       14       15
+    ## X41       17        2       15
+    ## X42       17        2       14
+    ## X43       17       15        2
+    ## 
+    ## $usekernel
+    ## [1] TRUE
+    ## 
+    ## $varnames
+    ## [1] "symptom1" "symptom2" "symptom3"
+    ## 
+    ## $xNames
+    ## [1] "symptom1" "symptom2" "symptom3"
+    ## 
+    ## $problemType
+    ## [1] "Classification"
+    ## 
+    ## $tuneValue
+    ##   fL usekernel adjust
+    ## 2  0      TRUE      1
+    ## 
+    ## $obsLevels
+    ## [1] "cavity"                  "dentin hypersensitivity"
+    ## [3] "Mouth Sores"             "Oral Cancer"            
+    ## [5] "Periodontitis"           "Tooth Erosion"          
+    ## attr(,"ordered")
+    ## [1] FALSE
+    ## 
+    ## $param
+    ## list()
+    ## 
+    ## attr(,"class")
+    ## [1] "NaiveBayes"
+
+``` r
+print(teeth_caret_model_rpart$finalModel)
+```
+
+    ## n= 54 
+    ## 
+    ## node), split, n, loss, yval, (yprob)
+    ##       * denotes terminal node
+    ## 
+    ## 1) root 54 30 Periodontitis (0.11 0.11 0.11 0.11 0.44 0.11)  
+    ##   2) symptom1< 13.5 30 24 cavity (0.2 0.13 0.13 0.2 0.2 0.13)  
+    ##     4) symptom1>=2.5 22 16 cavity (0.27 0.091 0.18 0.27 0 0.18)  
+    ##       8) symptom1>=9.5 8  4 cavity (0.5 0.25 0.25 0 0 0) *
+    ##       9) symptom1< 9.5 14  8 Oral Cancer (0.14 0 0.14 0.43 0 0.29) *
+    ##     5) symptom1< 2.5 8  2 Periodontitis (0 0.25 0 0 0.75 0) *
+    ##   3) symptom1>=13.5 24  6 Periodontitis (0 0.083 0.083 0 0.75 0.083) *
+
+## Test the Model
+
+``` r
+# We can test the model
+set.seed(9)
+predictions <- predict(teeth_caret_model_nb, newdata = teeth_disease_test)
+confusionMatrix(predictions, as.factor(teeth_disease_test$Disease))
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                          Reference
+    ## Prediction                cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       1                       0           1
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                0                       0           0
+    ##   Tooth Erosion                0                       1           0
+    ##                          Reference
+    ## Prediction                Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             0
+    ##   Tooth Erosion                     0             0             1
+    ## 
+    ## Overall Statistics
+    ##                                           
+    ##                Accuracy : 0.8182          
+    ##                  95% CI : (0.4822, 0.9772)
+    ##     No Information Rate : 0.5455          
+    ##     P-Value [Acc > NIR] : 0.0615          
+    ##                                           
+    ##                   Kappa : 0.725           
+    ##                                           
+    ##  Mcnemar's Test P-Value : NA              
+    ## 
+    ## Statistics by Class:
+    ## 
+    ##                      Class: cavity Class: dentin hypersensitivity
+    ## Sensitivity                1.00000                        0.00000
+    ## Specificity                0.90000                        1.00000
+    ## Pos Pred Value             0.50000                            NaN
+    ## Neg Pred Value             1.00000                        0.90909
+    ## Prevalence                 0.09091                        0.09091
+    ## Detection Rate             0.09091                        0.00000
+    ## Detection Prevalence       0.18182                        0.00000
+    ## Balanced Accuracy          0.95000                        0.50000
+    ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
+    ## Sensitivity                     0.00000            1.00000               1.0000
+    ## Specificity                     1.00000            1.00000               1.0000
+    ## Pos Pred Value                      NaN            1.00000               1.0000
+    ## Neg Pred Value                  0.90909            1.00000               1.0000
+    ## Prevalence                      0.09091            0.09091               0.5455
+    ## Detection Rate                  0.00000            0.09091               0.5455
+    ## Detection Prevalence            0.00000            0.09091               0.5455
+    ## Balanced Accuracy               0.50000            1.00000               1.0000
+    ##                      Class: Tooth Erosion
+    ## Sensitivity                       1.00000
+    ## Specificity                       0.90000
+    ## Pos Pred Value                    0.50000
+    ## Neg Pred Value                    1.00000
+    ## Prevalence                        0.09091
+    ## Detection Rate                    0.09091
+    ## Detection Prevalence              0.18182
+    ## Balanced Accuracy                 0.95000
+
+``` r
+set.seed(9)
+predictions <- predict(teeth_caret_model_svm_radial, newdata = teeth_disease_test)
+confusionMatrix(predictions, as.factor(teeth_disease_test$Disease))
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                          Reference
+    ## Prediction                cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       0                       0           0
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                1                       1           1
+    ##   Tooth Erosion                0                       0           0
+    ##                          Reference
+    ## Prediction                Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             1
+    ##   Tooth Erosion                     0             0             0
+    ## 
+    ## Overall Statistics
+    ##                                           
+    ##                Accuracy : 0.6364          
+    ##                  95% CI : (0.3079, 0.8907)
+    ##     No Information Rate : 0.5455          
+    ##     P-Value [Acc > NIR] : 0.3853          
+    ##                                           
+    ##                   Kappa : 0.2667          
+    ##                                           
+    ##  Mcnemar's Test P-Value : NA              
+    ## 
+    ## Statistics by Class:
+    ## 
+    ##                      Class: cavity Class: dentin hypersensitivity
+    ## Sensitivity                0.00000                        0.00000
+    ## Specificity                1.00000                        1.00000
+    ## Pos Pred Value                 NaN                            NaN
+    ## Neg Pred Value             0.90909                        0.90909
+    ## Prevalence                 0.09091                        0.09091
+    ## Detection Rate             0.00000                        0.00000
+    ## Detection Prevalence       0.00000                        0.00000
+    ## Balanced Accuracy          0.50000                        0.50000
+    ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
+    ## Sensitivity                     0.00000            1.00000               1.0000
+    ## Specificity                     1.00000            1.00000               0.2000
+    ## Pos Pred Value                      NaN            1.00000               0.6000
+    ## Neg Pred Value                  0.90909            1.00000               1.0000
+    ## Prevalence                      0.09091            0.09091               0.5455
+    ## Detection Rate                  0.00000            0.09091               0.5455
+    ## Detection Prevalence            0.00000            0.09091               0.9091
+    ## Balanced Accuracy               0.50000            1.00000               0.6000
+    ##                      Class: Tooth Erosion
+    ## Sensitivity                       0.00000
+    ## Specificity                       1.00000
+    ## Pos Pred Value                        NaN
+    ## Neg Pred Value                    0.90909
+    ## Prevalence                        0.09091
+    ## Detection Rate                    0.00000
+    ## Detection Prevalence              0.00000
+    ## Balanced Accuracy                 0.50000
+
+``` r
+set.seed(9)
+predictions <- predict(teeth_caret_model_knn, newdata = teeth_disease_test)
+confusionMatrix(predictions, as.factor(teeth_disease_test$Disease))
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                          Reference
+    ## Prediction                cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       0                       0           0
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  0                       0           0
+    ##   Periodontitis                1                       1           1
+    ##   Tooth Erosion                0                       0           0
+    ##                          Reference
+    ## Prediction                Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             1
+    ##   Tooth Erosion                     0             0             0
+    ## 
+    ## Overall Statistics
+    ##                                           
+    ##                Accuracy : 0.6364          
+    ##                  95% CI : (0.3079, 0.8907)
+    ##     No Information Rate : 0.5455          
+    ##     P-Value [Acc > NIR] : 0.3853          
+    ##                                           
+    ##                   Kappa : 0.2667          
+    ##                                           
+    ##  Mcnemar's Test P-Value : NA              
+    ## 
+    ## Statistics by Class:
+    ## 
+    ##                      Class: cavity Class: dentin hypersensitivity
+    ## Sensitivity                0.00000                        0.00000
+    ## Specificity                1.00000                        1.00000
+    ## Pos Pred Value                 NaN                            NaN
+    ## Neg Pred Value             0.90909                        0.90909
+    ## Prevalence                 0.09091                        0.09091
+    ## Detection Rate             0.00000                        0.00000
+    ## Detection Prevalence       0.00000                        0.00000
+    ## Balanced Accuracy          0.50000                        0.50000
+    ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
+    ## Sensitivity                     0.00000            1.00000               1.0000
+    ## Specificity                     1.00000            1.00000               0.2000
+    ## Pos Pred Value                      NaN            1.00000               0.6000
+    ## Neg Pred Value                  0.90909            1.00000               1.0000
+    ## Prevalence                      0.09091            0.09091               0.5455
+    ## Detection Rate                  0.00000            0.09091               0.5455
+    ## Detection Prevalence            0.00000            0.09091               0.9091
+    ## Balanced Accuracy               0.50000            1.00000               0.6000
+    ##                      Class: Tooth Erosion
+    ## Sensitivity                       0.00000
+    ## Specificity                       1.00000
+    ## Pos Pred Value                        NaN
+    ## Neg Pred Value                    0.90909
+    ## Prevalence                        0.09091
+    ## Detection Rate                    0.00000
+    ## Detection Prevalence              0.00000
+    ## Balanced Accuracy                 0.50000
+
+``` r
+set.seed(9)
+predictions <- predict(teeth_caret_model_rpart, newdata = teeth_disease_test)
+confusionMatrix(predictions, as.factor(teeth_disease_test$Disease))
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##                          Reference
+    ## Prediction                cavity dentin hypersensitivity Mouth Sores
+    ##   cavity                       0                       0           1
+    ##   dentin hypersensitivity      0                       0           0
+    ##   Mouth Sores                  0                       0           0
+    ##   Oral Cancer                  1                       0           0
+    ##   Periodontitis                0                       1           0
+    ##   Tooth Erosion                0                       0           0
+    ##                          Reference
+    ## Prediction                Oral Cancer Periodontitis Tooth Erosion
+    ##   cavity                            0             0             0
+    ##   dentin hypersensitivity           0             0             0
+    ##   Mouth Sores                       0             0             0
+    ##   Oral Cancer                       1             0             1
+    ##   Periodontitis                     0             6             0
+    ##   Tooth Erosion                     0             0             0
+    ## 
+    ## Overall Statistics
+    ##                                           
+    ##                Accuracy : 0.6364          
+    ##                  95% CI : (0.3079, 0.8907)
+    ##     No Information Rate : 0.5455          
+    ##     P-Value [Acc > NIR] : 0.3853          
+    ##                                           
+    ##                   Kappa : 0.4133          
+    ##                                           
+    ##  Mcnemar's Test P-Value : NA              
+    ## 
+    ## Statistics by Class:
+    ## 
+    ##                      Class: cavity Class: dentin hypersensitivity
+    ## Sensitivity                0.00000                        0.00000
+    ## Specificity                0.90000                        1.00000
+    ## Pos Pred Value             0.00000                            NaN
+    ## Neg Pred Value             0.90000                        0.90909
+    ## Prevalence                 0.09091                        0.09091
+    ## Detection Rate             0.00000                        0.00000
+    ## Detection Prevalence       0.09091                        0.00000
+    ## Balanced Accuracy          0.45000                        0.50000
+    ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
+    ## Sensitivity                     0.00000            1.00000               1.0000
+    ## Specificity                     1.00000            0.80000               0.8000
+    ## Pos Pred Value                      NaN            0.33333               0.8571
+    ## Neg Pred Value                  0.90909            1.00000               1.0000
+    ## Prevalence                      0.09091            0.09091               0.5455
+    ## Detection Rate                  0.00000            0.09091               0.5455
+    ## Detection Prevalence            0.00000            0.27273               0.6364
+    ## Balanced Accuracy               0.50000            0.90000               0.9000
+    ##                      Class: Tooth Erosion
+    ## Sensitivity                       0.00000
+    ## Specificity                       1.00000
+    ## Pos Pred Value                        NaN
+    ## Neg Pred Value                    0.90909
+    ## Prevalence                        0.09091
+    ## Detection Rate                    0.00000
+    ## Detection Prevalence              0.00000
+    ## Balanced Accuracy                 0.50000
+
+save the model with following code
+
+``` r
+saveRDS(teeth_caret_model_svm_radial, "../models/saved_teeth_caret_model_svm_radial.rds")
+```
 
 # \<You can Provide Another Appropriate Title Here if you wish\>
 
