@@ -111,6 +111,30 @@ if (require("rpart")) {
                    repos = "https://cloud.r-project.org")
 }
 
+## caretEnsemble ----
+if (require("caretEnsemble")) {
+  require("caretEnsemble")
+} else {
+  install.packages("caretEnsemble", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## C50 ----
+if (require("C50")) {
+  require("C50")
+} else {
+  install.packages("C50", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## adabag ----
+if (require("adabag")) {
+  require("adabag")
+} else {
+  install.packages("adabag", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 #loading the datasets ----
 library(readr)
 Data_of_teeth <- read_csv("data/Data of teeth.csv")
@@ -477,6 +501,57 @@ xyplot(results, models = c("NB", "CART"))
 diffs <- diff(results)
 
 summary(diffs)
+
+#  Stacking ----
+# The "caretEnsemble" package allows you to combine the predictions of multiple
+# caret models.
+
+## caretEnsemble::caretStack() ----
+# Given a list of caret models, the "caretStack()" function (in the
+# "caretEnsemble" package) can be used to specify a higher-order model to
+# learn how to best combine together the predictions of sub-models.
+
+## caretEnsemble::caretList() ----
+# The "caretList()" function provided by the "caretEnsemble" package can be
+# used to create a list of standard caret models.
+
+# Example of Stacking algorithms
+train_index <- createDataPartition(teeth_Num$Disease,
+                                   p = 0.75,
+                                   list = FALSE)
+teeth_disease_train <- teeth_Num[train_index, ]
+teeth_disease_test <- teeth_Num[-train_index, ]
+train_control <- trainControl(method = "repeatedcv", number = 10, repeats = 3,
+                              savePredictions = "final", classProbs = F)
+set.seed(7)
+
+sapply(teeth_disease_train, class)
+data2$x2 <- as.factor(data2$x2) 
+teeth_disease_train$Disease<-as.factor(teeth_disease_train$Disease)
+sapply(teeth_disease_train, class)
+
+algorithm_list <- c( "knn", "rpart","svmRadial")
+models <- caretList(Disease ~ ., data = teeth_disease_train, trControl = train_control,
+                    methodList = algorithm_list)
+
+# Summarize results before stacking
+results <- resamples(models)
+summary(results)
+dotplot(results)
+
+# The predictions made by the sub-models that are combined using stacking
+# should have a low-correlation (for diversity amongst the sub-models, i.e.,
+# different sub-models are accurate in different ways). If the predictions for
+# the sub-models were highly correlated (> 0.75) then they would be making the
+# same or very similar predictions most of the time reducing the benefit of
+# combining the predictions.
+
+# correlation between results
+modelCor(results)
+splom(results)
+
+
+
 
 
 

@@ -46,6 +46,9 @@ Business Intelligence Lab Submission Markdown
           - [5. Pairwise xyPlots](#5-pairwise-xyplots)
           - [6. Statistical Significance
             Tests](#6-statistical-significance-tests)
+  - [Stacking](#stacking)
+      - [Example of Stacking
+        algorithms](#example-of-stacking-algorithms)
   - [\<You can Provide Another Appropriate Title Here if you
     wish\>](#you-can-provide-another-appropriate-title-here-if-you-wish)
       - [\<You Can Have a Sub-Title Here if you
@@ -218,6 +221,30 @@ if (require("rpart")) {
   require("rpart")
 } else {
   install.packages("rpart", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## caretEnsemble ----
+if (require("caretEnsemble")) {
+  require("caretEnsemble")
+} else {
+  install.packages("caretEnsemble", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## C50 ----
+if (require("C50")) {
+  require("C50")
+} else {
+  install.packages("C50", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## adabag ----
+if (require("adabag")) {
+  require("adabag")
+} else {
+  install.packages("adabag", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
 ```
@@ -710,19 +737,19 @@ table(predictions, teeth_disease_test$Disease)
 
     ##                          
     ## predictions               cavity dentin hypersensitivity Mouth Sores
-    ##   cavity                       1                       1           1
+    ##   cavity                       1                       0           0
     ##   dentin hypersensitivity      0                       0           0
     ##   Mouth Sores                  0                       0           0
     ##   Oral Cancer                  0                       0           0
-    ##   Periodontitis                0                       0           0
+    ##   Periodontitis                0                       1           1
     ##   Tooth Erosion                0                       0           0
     ##                          
     ## predictions               Oral Cancer Periodontitis Tooth Erosion
     ##   cavity                            0             0             0
     ##   dentin hypersensitivity           0             0             0
     ##   Mouth Sores                       0             0             0
-    ##   Oral Cancer                       1             0             1
-    ##   Periodontitis                     0             6             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             1
     ##   Tooth Erosion                     0             0             0
 
 ``` r
@@ -735,19 +762,19 @@ print(confusion_matrix)
     ## 
     ##                          Reference
     ## Prediction                cavity dentin hypersensitivity Mouth Sores
-    ##   cavity                       1                       1           1
+    ##   cavity                       1                       0           0
     ##   dentin hypersensitivity      0                       0           0
     ##   Mouth Sores                  0                       0           0
     ##   Oral Cancer                  0                       0           0
-    ##   Periodontitis                0                       0           0
+    ##   Periodontitis                0                       1           1
     ##   Tooth Erosion                0                       0           0
     ##                          Reference
     ## Prediction                Oral Cancer Periodontitis Tooth Erosion
     ##   cavity                            0             0             0
     ##   dentin hypersensitivity           0             0             0
     ##   Mouth Sores                       0             0             0
-    ##   Oral Cancer                       1             0             1
-    ##   Periodontitis                     0             6             0
+    ##   Oral Cancer                       1             0             0
+    ##   Periodontitis                     0             6             1
     ##   Tooth Erosion                     0             0             0
     ## 
     ## Overall Statistics
@@ -757,7 +784,7 @@ print(confusion_matrix)
     ##     No Information Rate : 0.5455          
     ##     P-Value [Acc > NIR] : 0.1829          
     ##                                           
-    ##                   Kappa : 0.5875          
+    ##                   Kappa : 0.4923          
     ##                                           
     ##  Mcnemar's Test P-Value : NA              
     ## 
@@ -765,22 +792,22 @@ print(confusion_matrix)
     ## 
     ##                      Class: cavity Class: dentin hypersensitivity
     ## Sensitivity                1.00000                        0.00000
-    ## Specificity                0.80000                        1.00000
-    ## Pos Pred Value             0.33333                            NaN
+    ## Specificity                1.00000                        1.00000
+    ## Pos Pred Value             1.00000                            NaN
     ## Neg Pred Value             1.00000                        0.90909
     ## Prevalence                 0.09091                        0.09091
     ## Detection Rate             0.09091                        0.00000
-    ## Detection Prevalence       0.27273                        0.00000
-    ## Balanced Accuracy          0.90000                        0.50000
+    ## Detection Prevalence       0.09091                        0.00000
+    ## Balanced Accuracy          1.00000                        0.50000
     ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
     ## Sensitivity                     0.00000            1.00000               1.0000
-    ## Specificity                     1.00000            0.90000               1.0000
-    ## Pos Pred Value                      NaN            0.50000               1.0000
+    ## Specificity                     1.00000            1.00000               0.4000
+    ## Pos Pred Value                      NaN            1.00000               0.6667
     ## Neg Pred Value                  0.90909            1.00000               1.0000
     ## Prevalence                      0.09091            0.09091               0.5455
     ## Detection Rate                  0.00000            0.09091               0.5455
-    ## Detection Prevalence            0.00000            0.18182               0.5455
-    ## Balanced Accuracy               0.50000            0.95000               1.0000
+    ## Detection Prevalence            0.00000            0.09091               0.8182
+    ## Balanced Accuracy               0.50000            1.00000               0.7000
     ##                      Class: Tooth Erosion
     ## Sensitivity                       0.00000
     ## Specificity                       1.00000
@@ -817,8 +844,8 @@ print(teeth_caret_model_nb)
     ## Resampling results across tuning parameters:
     ## 
     ##   usekernel  Accuracy   Kappa    
-    ##   FALSE      0.4444444  0.1477149
-    ##    TRUE      0.7000000  0.5798596
+    ##   FALSE      0.4638889  0.1858009
+    ##    TRUE      0.7194444  0.6113501
     ## 
     ## Tuning parameter 'fL' was held constant at a value of 0
     ## Tuning
@@ -841,12 +868,12 @@ print(confusion_matrix)
     ## 
     ##                          Reference
     ## Prediction                cavity dentin hypersensitivity Mouth Sores
-    ##   cavity                       1                       0           1
+    ##   cavity                       0                       0           0
     ##   dentin hypersensitivity      0                       0           0
     ##   Mouth Sores                  0                       0           0
     ##   Oral Cancer                  0                       0           0
-    ##   Periodontitis                0                       0           0
-    ##   Tooth Erosion                0                       1           0
+    ##   Periodontitis                1                       1           1
+    ##   Tooth Erosion                0                       0           0
     ##                          Reference
     ## Prediction                Oral Cancer Periodontitis Tooth Erosion
     ##   cavity                            0             0             0
@@ -858,44 +885,44 @@ print(confusion_matrix)
     ## 
     ## Overall Statistics
     ##                                           
-    ##                Accuracy : 0.8182          
-    ##                  95% CI : (0.4822, 0.9772)
+    ##                Accuracy : 0.7273          
+    ##                  95% CI : (0.3903, 0.9398)
     ##     No Information Rate : 0.5455          
-    ##     P-Value [Acc > NIR] : 0.0615          
+    ##     P-Value [Acc > NIR] : 0.1829          
     ##                                           
-    ##                   Kappa : 0.725           
+    ##                   Kappa : 0.4923          
     ##                                           
     ##  Mcnemar's Test P-Value : NA              
     ## 
     ## Statistics by Class:
     ## 
     ##                      Class: cavity Class: dentin hypersensitivity
-    ## Sensitivity                1.00000                        0.00000
-    ## Specificity                0.90000                        1.00000
-    ## Pos Pred Value             0.50000                            NaN
-    ## Neg Pred Value             1.00000                        0.90909
+    ## Sensitivity                0.00000                        0.00000
+    ## Specificity                1.00000                        1.00000
+    ## Pos Pred Value                 NaN                            NaN
+    ## Neg Pred Value             0.90909                        0.90909
     ## Prevalence                 0.09091                        0.09091
-    ## Detection Rate             0.09091                        0.00000
-    ## Detection Prevalence       0.18182                        0.00000
-    ## Balanced Accuracy          0.95000                        0.50000
+    ## Detection Rate             0.00000                        0.00000
+    ## Detection Prevalence       0.00000                        0.00000
+    ## Balanced Accuracy          0.50000                        0.50000
     ##                      Class: Mouth Sores Class: Oral Cancer Class: Periodontitis
     ## Sensitivity                     0.00000            1.00000               1.0000
-    ## Specificity                     1.00000            1.00000               1.0000
-    ## Pos Pred Value                      NaN            1.00000               1.0000
+    ## Specificity                     1.00000            1.00000               0.4000
+    ## Pos Pred Value                      NaN            1.00000               0.6667
     ## Neg Pred Value                  0.90909            1.00000               1.0000
     ## Prevalence                      0.09091            0.09091               0.5455
     ## Detection Rate                  0.00000            0.09091               0.5455
-    ## Detection Prevalence            0.00000            0.09091               0.5455
-    ## Balanced Accuracy               0.50000            1.00000               1.0000
+    ## Detection Prevalence            0.00000            0.09091               0.8182
+    ## Balanced Accuracy               0.50000            1.00000               0.7000
     ##                      Class: Tooth Erosion
     ## Sensitivity                       1.00000
-    ## Specificity                       0.90000
-    ## Pos Pred Value                    0.50000
+    ## Specificity                       1.00000
+    ## Pos Pred Value                    1.00000
     ## Neg Pred Value                    1.00000
     ## Prevalence                        0.09091
     ## Detection Rate                    0.09091
-    ## Detection Prevalence              0.18182
-    ## Balanced Accuracy                 0.95000
+    ## Detection Prevalence              0.09091
+    ## Balanced Accuracy                 1.00000
 
 ## 3\. kNN for a classification problem with CARET’s train function
 
@@ -1028,9 +1055,9 @@ print(teeth_caret_model_svm_radial)
     ##   0.50  0.5333333  0.2452381
     ##   1.00  0.5333333  0.2452381
     ## 
-    ## Tuning parameter 'sigma' was held constant at a value of 0.1649718
+    ## Tuning parameter 'sigma' was held constant at a value of 0.3597508
     ## Accuracy was used to select the optimal model using the largest value.
-    ## The final values used for the model were sigma = 0.1649718 and C = 0.5.
+    ## The final values used for the model were sigma = 0.3597508 and C = 0.5.
 
 ``` r
 #### Make predictions ----
@@ -1307,6 +1334,102 @@ summary(diffs)
     ## KNN  1.00000              0.05463  -0.29165
     ## SVM  1.00000   0.01158             -0.34628
     ## NB   8.658e-07 1.359e-07 1.979e-07
+
+# Stacking
+
+The “caretEnsemble” package allows you to combine the predictions of
+multiple caret models.
+
+caretEnsemble::caretStack() Given a list of caret models, the
+“caretStack()” function (in the “caretEnsemble” package) can be used
+to specify a higher-order model to learn how to best combine together
+the predictions of sub-models.
+
+caretEnsemble::caretList() The “caretList()” function provided by the
+“caretEnsemble” package can be used to create a list of standard caret
+models.
+
+## Example of Stacking algorithms
+
+``` r
+train_index <- createDataPartition(teeth_Num$Disease, p = 0.75, list = FALSE)
+teeth_disease_train <- teeth_Num[train_index, ]
+teeth_disease_test <- teeth_Num[-train_index, ]
+train_control <- trainControl(method = "repeatedcv", number = 10, repeats = 3, savePredictions = "final",
+    classProbs = F)
+set.seed(7)
+
+sapply(teeth_disease_train, class)
+```
+
+    ##     Disease    symptom1    symptom2    symptom3 
+    ## "character"   "numeric"   "numeric"   "numeric"
+
+``` r
+teeth_disease_train$Disease <- as.factor(teeth_disease_train$Disease)
+sapply(teeth_disease_train, class)
+```
+
+    ##   Disease  symptom1  symptom2  symptom3 
+    ##  "factor" "numeric" "numeric" "numeric"
+
+``` r
+algorithm_list <- c("knn", "rpart", "svmRadial")
+models <- caretList(Disease ~ ., data = teeth_disease_train, trControl = train_control,
+    methodList = algorithm_list)
+
+# Summarize results before stacking
+results <- resamples(models)
+summary(results)
+```
+
+    ## 
+    ## Call:
+    ## summary.resamples(object = results)
+    ## 
+    ## Models: knn, rpart, svmRadial 
+    ## Number of resamples: 30 
+    ## 
+    ## Accuracy 
+    ##           Min.  1st Qu.    Median      Mean   3rd Qu. Max. NA's
+    ## knn       0.00 0.350000 0.5000000 0.5048413 0.6666667    1    0
+    ## rpart     0.00 0.297619 0.3333333 0.3950794 0.5000000    1    0
+    ## svmRadial 0.25 0.500000 0.5000000 0.5603968 0.6666667    1    0
+    ## 
+    ## Kappa 
+    ##           Min. 1st Qu.     Median      Mean   3rd Qu.      Max. NA's
+    ## knn       -0.2       0 0.09401709 0.1876858 0.3645833 1.0000000    0
+    ## rpart     -0.5       0 0.14285714 0.1188706 0.2105263 0.4117647    1
+    ## svmRadial  0.0       0 0.22222222 0.2072797 0.3750000 1.0000000    1
+
+``` r
+dotplot(results)
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2030%20Code%20Chunk-1.png)<!-- -->
+
+The predictions made by the sub-models that are combined using stacking
+should have a low-correlation (for diversity amongst the sub-models,
+i.e., different sub-models are accurate in different ways). If the
+predictions for the sub-models were highly correlated (\> 0.75) then
+they would be making the same or very similar predictions most of the
+time reducing the benefit of combining the predictions.
+
+``` r
+# correlation between results
+modelCor(results)
+```
+
+    ##                 knn     rpart svmRadial
+    ## knn       1.0000000 0.2369722 0.4812045
+    ## rpart     0.2369722 1.0000000 0.7432532
+    ## svmRadial 0.4812045 0.7432532 1.0000000
+
+``` r
+splom(results)
+```
+
+![](Lab-Submission-Markdown_files/figure-gfm/Your%2031%20Code%20Chunk-1.png)<!-- -->
 
 # \<You can Provide Another Appropriate Title Here if you wish\>
 
